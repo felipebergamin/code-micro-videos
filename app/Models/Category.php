@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-  use HasFactory;
-  use SoftDeletes;
+  use HasFactory, SoftDeletes, Traits\Uuid;
 
   protected $fillable = ['name', 'description', 'is_active'];
   protected $dates = ['deleted_at'];
+  protected $casts = [
+    'id' => 'string'
+  ];
 }

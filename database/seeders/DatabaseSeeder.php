@@ -6,16 +6,16 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     *
-     * @return void
-     */
-    public function run()
-    {
-        // \App\Models\User::factory(10)->create();
-        $this->call([
-            \Database\Seeders\CategorySeeder::class
-        ]);
-    }
+  /**
+   * Seed the application's database.
+   *
+   * @return void
+   */
+  public function run()
+  {
+    $this->call([
+      CategorySeeder::class,
+      GenreSeeder::class,
+    ]);
+  }
 }

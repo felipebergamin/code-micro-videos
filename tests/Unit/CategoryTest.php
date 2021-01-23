@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 class CategoryTest extends TestCase
 {
+  /** @var Category $category */
   private $category;
 
   protected function setUp(): void
@@ -18,11 +19,6 @@ class CategoryTest extends TestCase
     $this->category = new Category();
   }
 
-  /**
-   * A basic unit test example.
-   *
-   * @return void
-   */
   public function testFillable()
   {
     $fillable = ['name', 'description', 'is_active'];
@@ -47,16 +43,14 @@ class CategoryTest extends TestCase
   public function testDatesAttribute()
   {
     $dates = ['deleted_at', 'updated_at', 'created_at'];
-    foreach ($dates as $date) {
-      $this->assertContains($date, $this->category->getDates());
-    }
+    $this->assertEqualsCanonicalizing($dates, $this->category->getDates());
     $this->assertCount(count($dates), $this->category->getDates());
   }
 
   public function testCastsAttribute()
   {
-    $casts = ['id' => 'string', 'deleted_at' => 'datetime'];
-    $this->assertEquals($casts, $this->category->getCasts());
+    $casts = ['id' => 'string', 'deleted_at' => 'datetime', 'is_active' => 'boolean'];
+    $this->assertEqualsCanonicalizing($casts, $this->category->getCasts());
   }
 
   public function testIncrementing()

@@ -4,12 +4,15 @@ namespace Tests\Unit;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use App\Models\Category;
 use App\Models\Traits\Uuid;
 use PHPUnit\Framework\TestCase;
 
 class CategoryTest extends TestCase
 {
+  use DatabaseMigrations;
+
   /**
    * A basic unit test example.
    *

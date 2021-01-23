@@ -63,6 +63,14 @@ class CategoryTest extends TestCase
       'is_active' => true,
     ]);
     $this->assertTrue($category->is_active);
+
+    $category = Category::create([
+      'name' => 'test',
+    ])->first();
+    $this->assertMatchesRegularExpression(
+      "/^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i",
+      $category->id,
+    );
   }
 
   public function testUpdate()

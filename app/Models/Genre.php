@@ -11,8 +11,9 @@ class Genre extends Model
   use HasFactory, SoftDeletes, Traits\Uuid;
 
   protected $fillable = ['name', 'is_active'];
-  protected $dates = ['deleted_at'];
+  protected $dates = ['deleted_at', 'created_at', 'updated_at'];
   protected $casts = [
-    'id' => 'string'
+    'id' => 'string',
+    'is_active' => 'boolean'
   ];
 }

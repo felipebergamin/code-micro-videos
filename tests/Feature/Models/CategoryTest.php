@@ -91,4 +91,13 @@ class CategoryTest extends TestCase
       $this->assertEquals($value, $category->{$key});
     }
   }
+
+  public function testDeletion()
+  {
+    $category = Category::create([
+      'name' => 'category name'
+    ]);
+    $category->delete();
+    $this->assertCount(0, Category::all());
+  }
 }

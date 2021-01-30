@@ -2,21 +2,26 @@
 
 namespace Tests\Feature\Http\Controllers\Api;
 
-use App\Models\Category;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use App\Http\Controllers\BasicCrudController;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Mockery\MockInterface;
 use Tests\Stubs\Controllers\CategoryControllerStub;
 use Tests\Stubs\Models\CategoryStub;
 use Tests\TestCase;
-use Tests\Traits\TestSaves;
-use Tests\Traits\TestValidations;
 
 class BasicCrudControllerTest extends TestCase
 {
+  /** @var CategoryControllerStub $controller */
+  private $controller;
+
   protected function setUp(): void
   {
     parent::setUp();
     CategoryStub::dropTable();
     CategoryStub::createTable();
+    $this->controller = new CategoryControllerStub();
   }
 
   protected function tearDown(): void
@@ -29,8 +34,54 @@ class BasicCrudControllerTest extends TestCase
   {
     /** @var CategoryStub $category */
     $category = CategoryStub::create(['name' => 'test_name', 'description' => 'test_description']);
-    $controller = new CategoryControllerStub();
-    $result = $controller->index()->toArray();
+    $result = $this->controller->index()->toArray();
     $this->assertEquals([$category->toArray()], $result);
+  }
+
+  public function testInvalidationDataInStore()
+  {
+    $this->expectException(ValidationException::class);
+
+    /** @var MockInterface|Request */
+    $request = $this->mock(Request::class);
+    $request->shouldReceive('all')->once()->andReturn(['name' => '']);
+    $this->controller->store($request);
+  }
+
+  public function testStore()
+  {
+    /** @var MockInterface|Request */
+    $request = $this->mock(Request::class);
+    $request->shouldReceive('all')->once()->andReturn(['name' => 'test_name', 'description' => 'test_description']);
+    $obj = $this->controller->store($request);
+
+    $this->assertEquals(
+      CategoryStub::find(1)->toArray(),
+      $obj->toArray(),
+    );
+  }
+
+  public function testIfFindOrFailFetchModel()
+  {
+    /** @var CategoryStub $category */
+    $category = CategoryStub::create(['name' => 'test_name', 'description' => 'test_description']);
+
+    $reflectionClass = new \ReflectionClass(BasicCrudController::class);
+    $reflectionMethod = $reflectionClass->getMethod('findOrFail');
+    $reflectionMethod->setAccessible(true);
+
+    $result = $reflectionMethod->invokeArgs($this->controller, [$category->id]);
+    $this->assertInstanceOf(CategoryStub::class, $result);
+  }
+
+  public function testIfFindOrFailThrowExceptionWhenIdInvalid()
+  {
+    $this->expectException(ModelNotFoundException::class);
+    $reflectionClass = new \ReflectionClass(BasicCrudController::class);
+    $reflectionMethod = $reflectionClass->getMethod('findOrFail');
+    $reflectionMethod->setAccessible(true);
+
+    $result = $reflectionMethod->invokeArgs($this->controller, [0]);
+    $this->assertInstanceOf(CategoryStub::class, $result);
   }
 }

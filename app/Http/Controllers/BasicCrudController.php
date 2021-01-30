@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use Illuminate\Http\Request;
 
 abstract class BasicCrudController extends Controller
@@ -13,21 +12,27 @@ abstract class BasicCrudController extends Controller
 
   protected abstract function routeUpdate();
 
-  private $rules = [
-    'name' => 'required|max:255',
-    'is_active' => 'boolean'
-  ];
+  protected abstract function rulesStore();
 
   public function index()
   {
     return $this->model()::all();
   }
 
-  // public function store(Request $request)
-  // {
-  //   $this->validate($request, $this->rules);
-  //   return Category::create($request->all())->refresh();
-  // }
+  public function store(Request $request)
+  {
+    $validData = $this->validate($request, $this->rulesStore());
+    $obj = $this->model()::create($validData);
+    $obj->refresh();
+    return $obj;
+  }
+
+  protected function findOrFail($id)
+  {
+    $model = $this->model();
+    $keyName = (new $model)->getRouteKeyName();
+    return $this->model()::where($keyName, $id)->firstOrFail();
+  }
 
   // public function show(Category $category)
   // {

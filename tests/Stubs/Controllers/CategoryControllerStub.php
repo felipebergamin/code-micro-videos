@@ -7,16 +7,24 @@ use Tests\Stubs\Models\CategoryStub;
 
 class CategoryControllerStub extends BasicCrudController
 {
-  public function model()
+  protected function model()
   {
     return CategoryStub::class;
   }
 
-  public function routeStore()
+  protected function rulesStore()
+  {
+    return [
+      'name' => 'required|max:255',
+      'description' => 'nullable'
+    ];
+  }
+
+  protected function routeStore()
   {
   }
 
-  public function routeUpdate()
+  protected function routeUpdate()
   {
   }
 }

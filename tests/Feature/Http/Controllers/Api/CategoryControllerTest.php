@@ -100,6 +100,12 @@ class CategoryControllerTest extends TestCase
     $this->assertInvalidationInUpdateAction($data, 'boolean');
   }
 
+  public function testDelete()
+  {
+    $this->delete($this->routeDelete());
+    $this->assertNull(Category::find($this->category->id));
+  }
+
   protected function routeStore()
   {
     return route('categories.store');
@@ -108,6 +114,11 @@ class CategoryControllerTest extends TestCase
   protected function routeUpdate()
   {
     return route('categories.update', ['category' => $this->category->id]);
+  }
+
+  protected function routeDelete()
+  {
+    return route('categories.destroy', ['category' => $this->category->id]);
   }
 
   protected function model()

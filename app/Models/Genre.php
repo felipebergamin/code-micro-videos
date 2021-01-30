@@ -10,6 +10,7 @@ class Genre extends Model
 {
   use HasFactory, SoftDeletes, Traits\Uuid;
 
+  public $incrementing = false;
   protected $fillable = ['name', 'is_active'];
   protected $dates = ['deleted_at', 'created_at', 'updated_at'];
   protected $casts = [

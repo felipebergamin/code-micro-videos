@@ -4,6 +4,7 @@ namespace Tests\Feature\Http\Controllers\Api;
 
 use App\Models\Category;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\Stubs\Models\CategoryStub;
 use Tests\TestCase;
 use Tests\Traits\TestSaves;
 use Tests\Traits\TestValidations;
@@ -102,8 +103,9 @@ class CategoryControllerTest extends TestCase
 
   public function testDelete()
   {
-    $this->delete($this->routeDelete());
+    $this->json('DELETE', $this->routeDelete());
     $this->assertNull(Category::find($this->category->id));
+    $this->assertNotNull(Category::withTrashed()->find($this->category->id));
   }
 
   protected function routeStore()

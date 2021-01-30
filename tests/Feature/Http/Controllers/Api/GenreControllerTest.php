@@ -86,8 +86,9 @@ class GenreControllerTest extends TestCase
 
   public function testDelete()
   {
-    $this->delete($this->routeDelete());
+    $this->json('DELETE', $this->routeDelete());
     $this->assertNull(Genre::find($this->genre->id));
+    $this->assertNotNull(Genre::withTrashed()->find($this->genre->id));
   }
 
   protected function routeStore()

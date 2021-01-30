@@ -20,11 +20,11 @@ class CategoryControllerStub extends BasicCrudController
     ];
   }
 
-  protected function routeStore()
+  protected function rulesUpdate()
   {
-  }
-
-  protected function routeUpdate()
-  {
+    return [
+      'name' => 'required|max:255',
+      'description' => 'nullable'
+    ];
   }
 }

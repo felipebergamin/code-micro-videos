@@ -26,7 +26,7 @@ class VideoFactory extends Factory
       'title' => $this->faker->sentence(3),
       'description' => $this->faker->sentence(10),
       'year_launched' => rand(1895, date('Y')),
-      'opened' => rand(0, 1),
+      'opened' => false,
       'rating' => $rating,
       'duration' => rand(1, 30)
     ];

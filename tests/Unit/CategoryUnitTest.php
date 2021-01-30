@@ -8,7 +8,7 @@ use App\Models\Category;
 use App\Models\Traits\Uuid;
 use PHPUnit\Framework\TestCase;
 
-class CategoryTest extends TestCase
+class CategoryUnitTest extends TestCase
 {
   /** @var Category $category */
   private $category;

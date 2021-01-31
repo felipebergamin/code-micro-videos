@@ -2,8 +2,13 @@
 
 namespace Tests\Feature\Http\Controllers\Api;
 
+use App\Http\Controllers\VideoController;
+use App\Models\Category;
+use App\Models\Genre;
 use App\Models\Video;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Http\Request;
+use Tests\Exceptions\TestException;
 use Tests\TestCase;
 use Tests\Traits\TestSaves;
 use Tests\Traits\TestValidations;
@@ -43,17 +48,30 @@ class VideoControllerTest extends TestCase
 
   public function testSave()
   {
+    $category = Category::factory()->create();
+    $genre = Genre::factory()->create();
     $data = [
       [
-        'send_data' => $this->sendData,
+        'send_data' => $this->sendData + [
+          'categories_id' => [$category->id],
+          'genres_id' => [$genre->id]
+        ],
         'test_data' => $this->sendData + ['opened' => false]
       ],
       [
-        'send_data' => $this->sendData + ['opened' => true],
+        'send_data' => $this->sendData + [
+          'opened' => true,
+          'categories_id' => [$category->id],
+          'genres_id' => [$genre->id]
+        ],
         'test_data' => $this->sendData + ['opened' => true]
       ],
       [
-        'send_data' => $this->sendData + ['rating' => Video::RATING_LIST[1]],
+        'send_data' => $this->sendData + [
+          'rating' => Video::RATING_LIST[1],
+          'categories_id' => [$category->id],
+          'genres_id' => [$genre->id]
+        ],
         'test_data' => $this->sendData + ['rating' => Video::RATING_LIST[1]]
       ],
     ];
@@ -70,6 +88,33 @@ class VideoControllerTest extends TestCase
         $value['test_data'] + ['deleted_at' => null]
       );
       $response->assertJsonStructure(['created_at', 'updated_at']);
+    }
+  }
+
+  public function testRollbackStore()
+  {
+    $controller = $this->mock(VideoController::class)
+      ->makePartial()
+      ->shouldAllowMockingProtectedMethods();
+
+    $controller
+      ->shouldReceive('validate')
+      ->andReturn($this->sendData);
+    $controller
+      ->shouldReceive('rulesStore')
+      ->andReturn([]);
+    $controller
+      ->shouldReceive('handleRelations')
+      ->once()
+      ->andThrow(new TestException());
+
+    $request = $this->mock(Request::class);
+    $request->shouldReceive('all')->andReturn([]);
+
+    try {
+      $controller->store($request);
+    } catch (TestException $e) {
+      $this->assertCount(1, Video::all());
     }
   }
 

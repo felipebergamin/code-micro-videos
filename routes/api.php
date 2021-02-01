@@ -25,4 +25,5 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
   Route::resource('categories', 'CategoryController', $exceptCreateAndEdit);
   Route::resource('genres', 'GenreController', $exceptCreateAndEdit);
   Route::resource('videos', 'VideoController', $exceptCreateAndEdit);
+  Route::resource('cast_members', 'CastMemberController', $exceptCreateAndEdit);
 });

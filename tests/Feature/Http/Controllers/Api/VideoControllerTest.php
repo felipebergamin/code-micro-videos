@@ -147,6 +147,7 @@ class VideoControllerTest extends TestCase
 
     $request = $this->mock(Request::class);
     $request->shouldReceive('all')->andReturn([]);
+    $request->shouldReceive('get')->andReturn([]);
 
     $hasError = false;
     try {
@@ -181,6 +182,7 @@ class VideoControllerTest extends TestCase
 
     $request = $this->mock(Request::class);
     $request->shouldReceive('all')->andReturn([]);
+    $request->shouldReceive('get')->andReturn([]);
 
     $hasError = false;
     try {

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\CastMember;
 use App\Models\Traits\Uuid;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class CastMemberUnitTest extends TestCase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Models\VideoTest;
+namespace Tests\Feature\Models;
 
 use App\Models\Category;
 use App\Models\Genre;

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Genre;
 use App\Models\Traits\Uuid;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class GenreUnitTest extends TestCase
 {

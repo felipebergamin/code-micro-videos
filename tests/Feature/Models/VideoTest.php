@@ -7,11 +7,13 @@ use App\Models\Genre;
 use App\Models\Video;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
+use Tests\Traits\TestValidations;
 
 class VideoTest extends TestCase
 {
-  use DatabaseMigrations;
+  use DatabaseMigrations, TestValidations;
 
   private $data;
 
@@ -25,6 +27,16 @@ class VideoTest extends TestCase
       'rating' => Video::RATING_LIST[0],
       'duration' => 90,
     ];
+  }
+
+  public function testVideoUpload()
+  {
+    \Storage::fake();
+
+    $fileToUpload = UploadedFile::fake()->create('video.mp4')->mimeType('video/mp4');
+    $createdVideo = Video::create($this->data + ['video_file' => $fileToUpload]);
+    \Storage::assertExists("{$createdVideo->id}/{$fileToUpload->hashName()}");
+    $this->assertDatabaseHas($createdVideo->getTable(), $this->data);
   }
 
   public function testList()
@@ -44,6 +56,7 @@ class VideoTest extends TestCase
       'created_at',
       'updated_at',
       'deleted_at',
+      'video_file',
     ], $videoKeys);
   }
 

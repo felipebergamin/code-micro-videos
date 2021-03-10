@@ -9,6 +9,7 @@ use App\Models\Video;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Tests\Exceptions\TestException;
 use Tests\TestCase;
 use Tests\Traits\TestSaves;
@@ -110,6 +111,25 @@ class VideoControllerTest extends TestCase
         $value['send_data']['genres_id'][0],
       );
     }
+  }
+
+  public function testVideoUploadInvalidation()
+  {
+    \Storage::fake();
+
+    $file = UploadedFile::fake()->create('selfie.png')->mimeType('image/png');
+    $this->assertInvalidationInStoreAction(
+      ['video_file' => $file],
+      'mimetypes',
+      ['attribute' => 'video file', 'values' => 'video/mp4']
+    );
+
+    $file = UploadedFile::fake()->create('video.mp4')->mimeType('video/mp4')->size(VideoController::MAX_FILE_SIZE + 10);
+    $this->assertInvalidationInStoreAction(
+      ['video_file' => $file],
+      'max.file',
+      ['attribute' => 'video file', 'max' => VideoController::MAX_FILE_SIZE]
+    );
   }
 
   protected function assertHasCategory($videoId, $categoryId)

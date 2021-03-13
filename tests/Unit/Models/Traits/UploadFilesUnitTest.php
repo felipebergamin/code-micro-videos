@@ -6,7 +6,7 @@ use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 use Tests\Stubs\Models\UploadFilesStub;
 
-class UploadedFilesUnitTest extends TestCase
+class UploadFilesUnitTest extends TestCase
 {
   /** @var UploadFilesStub $obj */
   private $obj;
@@ -23,6 +23,22 @@ class UploadedFilesUnitTest extends TestCase
     $file = UploadedFile::fake()->create('video.mp4');
     $this->obj->uploadFile($file);
     \Storage::assertExists("1/{$file->hashName()}");
+  }
+
+  public function testDeleteOldFiles()
+  {
+    \Storage::fake();
+    $file1 = UploadedFile::fake()->create('video1.mp4')->size(1);
+    $file2 = UploadedFile::fake()->create('video2.mp4')->size(1);
+    $this->obj->uploadFiles([$file1, $file2]);
+    $this->obj->deleteOldFiles();
+    \Storage::assertExists("1/{$file1->hashName()}");
+    \Storage::assertExists("1/{$file2->hashName()}");
+
+    $this->obj->oldFiles = [$file1->hashName()];
+    $this->obj->deleteOldFiles();
+    \Storage::assertMissing("1/{$file1->hashName()}");
+    \Storage::assertExists("1/{$file2->hashName()}");
   }
 
   public function testDeleteFile()

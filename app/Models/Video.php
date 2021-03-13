@@ -20,7 +20,9 @@ class Video extends Model
     'year_launched',
     'opened',
     'rating',
-    'duration'
+    'duration',
+    'video_file',
+    'thumb_file'
   ];
 
   protected $dates = ['deleted_at'];
@@ -33,7 +35,7 @@ class Video extends Model
   ];
 
   public $incrementing = false;
-  public static $fileFields = ['video_file', 'banner', 'trailer'];
+  public static $fileFields = ['video_file', 'thumb_file'];
 
   public static function create(array $attributes = [])
   {
@@ -48,7 +50,7 @@ class Video extends Model
       return $obj;
     } catch (\Exception $e) {
       if (isset($obj)) {
-        // TODO: delete uploaded files
+        $obj->deleteFiles($files);
       }
       DB::rollBack();
       throw $e;

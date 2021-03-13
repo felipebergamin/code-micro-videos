@@ -14,12 +14,35 @@ class VideoUploadTest extends BaseVideoTestCase
     \Storage::fake();
     $video = Video::create(
       $this->data + [
-        'thumb_file' => UploadedFile::fake()->create('thumb.jpg')->mimeType('image/jpg'),
+        'thumb_file' => UploadedFile::fake()->image('thumb.jpg'),
         'video_file' => UploadedFile::fake()->create('video.mp4'),
       ]
     );
     \Storage::assertExists("{$video->id}/{$video->thumb_file}");
     \Storage::assertExists("{$video->id}/{$video->video_file}");
+  }
+
+  public function testCreateIfRollbackFiles()
+  {
+    \Storage::fake();
+    \Event::listen(TransactionCommitted::class, function () {
+      throw new TestException();
+    });
+    $hasError = false;
+
+    try {
+      Video::create(
+        $this->data + [
+          'thumb_file' => UploadedFile::fake()->image('thumb.jpg'),
+          'video_file' => UploadedFile::fake()->create('video.mp4'),
+        ],
+      );
+    } catch (TestException $err) {
+      $this->assertCount(0, \Storage::allFiles());
+      $hasError = true;
+    }
+
+    $this->assertTrue($hasError);
   }
 
   public function testUploadIfRollbackFiles()

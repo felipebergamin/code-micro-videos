@@ -6,6 +6,7 @@ RUN apk add --no-cache shadow \
   mysql-client \
   nodejs \
   npm \
+  git \
   freetype-dev \
   libjpeg-turbo-dev \
   libpng-dev

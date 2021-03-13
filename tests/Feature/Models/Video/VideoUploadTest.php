@@ -1,0 +1,46 @@
+<?php
+
+namespace Tests\Feature\Models\Video;
+
+use App\Models\Video;
+use Illuminate\Database\Events\TransactionCommitted;
+use Illuminate\Http\UploadedFile;
+use Tests\Exceptions\TestException;
+
+class VideoUploadTest extends BaseVideoTestCase
+{
+  public function testCreateWithFiles()
+  {
+    \Storage::fake();
+    $video = Video::create(
+      $this->data + [
+        'thumb_file' => UploadedFile::fake()->create('thumb.jpg')->mimeType('image/jpg'),
+        'video_file' => UploadedFile::fake()->create('video.mp4'),
+      ]
+    );
+    \Storage::assertExists("{$video->id}/{$video->thumb_file}");
+    \Storage::assertExists("{$video->id}/{$video->video_file}");
+  }
+
+  public function testUploadIfRollbackFiles()
+  {
+    \Storage::fake();
+    $video = Video::factory()->create();
+    \Event::listen(TransactionCommitted::class, function () {
+      throw new TestException();
+    });
+    $hasError = false;
+
+    try {
+      $video->update([
+        'video_file' => UploadedFile::fake()->create('video.mp4'),
+        'thumb_file' => UploadedFile::fake()->create('thumb.jpg'),
+      ]);
+    } catch (TestException $e) {
+      $this->assertCount(0, \Storage::allFiles());
+      $hasError = true;
+    }
+
+    $this->assertTrue($hasError);
+  }
+}

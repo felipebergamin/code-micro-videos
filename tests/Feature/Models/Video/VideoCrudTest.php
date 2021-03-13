@@ -1,44 +1,14 @@
 <?php
 
-namespace Tests\Feature\Models;
+namespace Tests\Feature\Models\Video;
 
 use App\Models\Category;
 use App\Models\Genre;
 use App\Models\Video;
 use Illuminate\Database\QueryException;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Http\UploadedFile;
-use Tests\TestCase;
-use Tests\Traits\TestValidations;
 
-class VideoTest extends TestCase
+class VideoCrudTest extends BaseVideoTestCase
 {
-  use DatabaseMigrations, TestValidations;
-
-  private $data;
-
-  protected function setUp(): void
-  {
-    parent::setUp();
-    $this->data = [
-      'title' => 'title',
-      'description' => 'description',
-      'year_launched' => 2010,
-      'rating' => Video::RATING_LIST[0],
-      'duration' => 90,
-    ];
-  }
-
-  public function testVideoUpload()
-  {
-    \Storage::fake();
-
-    $fileToUpload = UploadedFile::fake()->create('video.mp4')->mimeType('video/mp4');
-    $createdVideo = Video::create($this->data + ['video_file' => $fileToUpload]);
-    \Storage::assertExists("{$createdVideo->id}/{$fileToUpload->hashName()}");
-    $this->assertDatabaseHas($createdVideo->getTable(), $this->data);
-  }
-
   public function testList()
   {
     Video::factory()->create();

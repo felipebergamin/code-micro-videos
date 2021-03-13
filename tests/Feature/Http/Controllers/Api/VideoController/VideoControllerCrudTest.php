@@ -1,40 +1,16 @@
 <?php
 
-namespace Tests\Feature\Http\Controllers\Api;
+namespace Tests\Feature\Http\Controllers\Api\VideoController;
 
-use App\Http\Controllers\VideoController;
 use App\Models\Category;
 use App\Models\Genre;
 use App\Models\Video;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
-use Tests\Exceptions\TestException;
-use Tests\TestCase;
 use Tests\Traits\TestSaves;
 use Tests\Traits\TestValidations;
 
-class VideoControllerTest extends TestCase
+class VideoControllerCrudTest extends BaseVideoControllerTestCase
 {
-  use DatabaseMigrations, TestValidations, TestSaves;
-
-  /** @var Video $video */
-  private $video;
-  private $sendData;
-
-  protected function setUp(): void
-  {
-    parent::setUp();
-    $this->video = Video::factory()->create()->refresh();
-    $this->sendData = [
-      'title' => 'title',
-      'description' => 'description',
-      'year_launched' => 2010,
-      'rating' => Video::RATING_LIST[0],
-      'duration' => 90,
-    ];
-  }
+  use TestValidations, TestSaves;
 
   public function testIndex()
   {
@@ -111,41 +87,6 @@ class VideoControllerTest extends TestCase
         $value['send_data']['genres_id'][0],
       );
     }
-  }
-
-  public function testVideoUploadInvalidation()
-  {
-    \Storage::fake();
-
-    $file = UploadedFile::fake()->create('selfie.png')->mimeType('image/png');
-    $this->assertInvalidationInStoreAction(
-      ['video_file' => $file],
-      'mimetypes',
-      ['attribute' => 'video file', 'values' => 'video/mp4']
-    );
-
-    $file = UploadedFile::fake()->create('video.mp4')->mimeType('video/mp4')->size(VideoController::MAX_FILE_SIZE + 10);
-    $this->assertInvalidationInStoreAction(
-      ['video_file' => $file],
-      'max.file',
-      ['attribute' => 'video file', 'max' => VideoController::MAX_FILE_SIZE]
-    );
-  }
-
-  protected function assertHasCategory($videoId, $categoryId)
-  {
-    $this->assertDatabaseHas('category_video', [
-      'video_id' => $videoId,
-      'category_id' => $categoryId,
-    ]);
-  }
-
-  protected function assertHasGenre($videoId, $genreId)
-  {
-    $this->assertDatabaseHas('genre_video', [
-      'genre_id' => $genreId,
-      'video_id' => $videoId,
-    ]);
   }
 
   public function testInvalidationCategoriesIdField()
@@ -242,6 +183,22 @@ class VideoControllerTest extends TestCase
     $response->assertStatus(204);
     $this->assertNull(Video::find($this->video->id));
     $this->assertNotNull(Video::withTrashed()->find($this->video->id));
+  }
+
+  protected function assertHasCategory($videoId, $categoryId)
+  {
+    $this->assertDatabaseHas('category_video', [
+      'video_id' => $videoId,
+      'category_id' => $categoryId,
+    ]);
+  }
+
+  protected function assertHasGenre($videoId, $genreId)
+  {
+    $this->assertDatabaseHas('genre_video', [
+      'genre_id' => $genreId,
+      'video_id' => $videoId,
+    ]);
   }
 
   protected function routeStore()

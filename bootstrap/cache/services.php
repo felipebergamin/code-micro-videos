@@ -32,10 +32,12 @@
     28 => 'Laravel\\Tinker\\TinkerServiceProvider',
     29 => 'Carbon\\Laravel\\ServiceProvider',
     30 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    31 => 'App\\Providers\\AppServiceProvider',
-    32 => 'App\\Providers\\AuthServiceProvider',
-    33 => 'App\\Providers\\EventServiceProvider',
-    34 => 'App\\Providers\\RouteServiceProvider',
+    31 => 'Superbalist\\LaravelGoogleCloudStorage\\GoogleCloudStorageServiceProvider',
+    32 => 'App\\Providers\\AppServiceProvider',
+    33 => 'App\\Providers\\AuthServiceProvider',
+    34 => 'App\\Providers\\EventServiceProvider',
+    35 => 'App\\Providers\\RouteServiceProvider',
+    36 => 'Superbalist\\LaravelGoogleCloudStorage\\GoogleCloudStorageServiceProvider',
   ),
   'eager' => 
   array (
@@ -55,10 +57,12 @@
     13 => 'Fruitcake\\Cors\\CorsServiceProvider',
     14 => 'Carbon\\Laravel\\ServiceProvider',
     15 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    16 => 'App\\Providers\\AppServiceProvider',
-    17 => 'App\\Providers\\AuthServiceProvider',
-    18 => 'App\\Providers\\EventServiceProvider',
-    19 => 'App\\Providers\\RouteServiceProvider',
+    16 => 'Superbalist\\LaravelGoogleCloudStorage\\GoogleCloudStorageServiceProvider',
+    17 => 'App\\Providers\\AppServiceProvider',
+    18 => 'App\\Providers\\AuthServiceProvider',
+    19 => 'App\\Providers\\EventServiceProvider',
+    20 => 'App\\Providers\\RouteServiceProvider',
+    21 => 'Superbalist\\LaravelGoogleCloudStorage\\GoogleCloudStorageServiceProvider',
   ),
   'deferred' => 
   array (

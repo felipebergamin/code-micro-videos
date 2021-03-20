@@ -1,7 +1,23 @@
 steps:
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - kms
+      - decrypt
+      - --ciphertext-file=./storage/credentials/google/service-account-storage.json.enc
+      - --plaintext-file=./storage/credentials/google/service-account-storage.json
+      - --location=global
+      - --keyring=testing-lesson
+      - --key=service-account
+
   - id: "Rodando docker-compose"
     name: "docker/compose"
     args: ["-f", "docker-compose.cloudbuild.yaml", "up", "-d"]
+    env:
+      - GOOGLE_CLOUD_PROJECT_ID=code-micro-videos-303318
+      - GOOGLE_CLOUD_KEY_FILE=service-account-storage.json
+      - GOOGLE_CLOUD_STORAGE_BUCKET=code-micro-videos-frb
+      - GOOGLE_CLOUD_STORAGE_API_URI=https://storage.cloud.google.com/code-micro-videos-frb
+      - TESTING_PROD=true
 
   - id: "Chown in /var/www"
     name: "docker"

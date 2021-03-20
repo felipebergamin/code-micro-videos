@@ -3,6 +3,7 @@
 namespace Tests\Feature\Models\Video;
 
 use App\Models\Video;
+use Config;
 use Illuminate\Database\Events\TransactionCommitted;
 use Illuminate\Http\UploadedFile;
 use Tests\Exceptions\TestException;
@@ -106,5 +107,35 @@ class VideoUploadTest extends BaseVideoTestCase
     \Storage::assertExists("{$video->id}/{$newVideoFile->hashName()}");
     \Storage::assertMissing("{$video->id}/{$videoFile->hashName()}");
     \Storage::assertExists("{$video->id}/{$trailerFile->hashName()}");
+  }
+
+  public function testFileUrlsWithLocalDriver()
+  {
+    $fileFields = [];
+    foreach (Video::$fileFields as $field) {
+      $fileFields[$field] = "$field.test";
+    }
+    $video = Video::factory()->create($fileFields);
+    $localDriver = Config::get('filesystems.default');
+    $baseUrl = Config::get('filesystems.disks.' . $localDriver)['url'];
+    foreach ($fileFields as $field => $value) {
+      $fileUrl = $video->{"{$field}_url"};
+      $this->assertEquals("{$baseUrl}/$video->id/$value", $fileUrl);
+    }
+  }
+
+  public function testFileUrlsWithGcpDriver()
+  {
+    $fileFields = [];
+    foreach (Video::$fileFields as $field) {
+      $fileFields[$field] = "$field.test";
+    }
+    $video = Video::factory()->create($fileFields);
+    $baseUrl = Config::get('filesystems.disks.gcs.storage_api_uri');
+    Config::set('filesystems.default', 'gcs');
+    foreach ($fileFields as $field => $value) {
+      $fileUrl = $video->{"{$field}_url"};
+      $this->assertEquals("{$baseUrl}/$video->id/$value", $fileUrl);
+    }
   }
 }

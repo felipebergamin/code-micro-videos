@@ -72,4 +72,9 @@ trait UploadFiles
     }
     return $files;
   }
+
+  public function relativeFilePath($value)
+  {
+    return "{$this->uploadDir()}/{$value}";
+  }
 }

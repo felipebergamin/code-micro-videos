@@ -2,30 +2,52 @@
 
 namespace Tests\Feature\Http\Controllers\Api\VideoController;
 
-use App\Http\Controllers\VideoController;
-use Illuminate\Http\UploadedFile;
+use Tests\Traits\TestUploads;
 use Tests\Traits\TestValidations;
 
 class VideoControllerUploadsTest extends BaseVideoControllerTestCase
 {
-  use TestValidations;
+  use TestValidations, TestUploads;
 
-  public function testVideoUploadInvalidation()
+  public function testInvalidationVideoField()
   {
-    \Storage::fake();
-
-    $file = UploadedFile::fake()->create('selfie.png')->mimeType('image/png');
-    $this->assertInvalidationInStoreAction(
-      ['video_file' => $file],
+    $this->assertInvalidationFile(
+      'video_file',
+      'mp4',
+      52428800,
       'mimetypes',
-      ['attribute' => 'video file', 'values' => 'video/mp4']
+      ['values' => 'video/mp4']
     );
+  }
 
-    $file = UploadedFile::fake()->create('video.mp4')->mimeType('video/mp4')->size(VideoController::MAX_FILE_SIZE + 10);
-    $this->assertInvalidationInStoreAction(
-      ['video_file' => $file],
-      'max.file',
-      ['attribute' => 'video file', 'max' => VideoController::MAX_FILE_SIZE]
+  public function testInvalidationThumberFile()
+  {
+    $this->assertInvalidationFile(
+      'thumb_file',
+      'png',
+      5120,
+      'image'
+    );
+  }
+
+  public function testInvalidationBannerFile()
+  {
+    $this->assertInvalidationFile(
+      'banner_file',
+      'jpg',
+      10240,
+      'image'
+    );
+  }
+
+  public function testInvalidationTrailerFile()
+  {
+    $this->assertInvalidationFile(
+      'trailer_file',
+      'mp4',
+      1048576,
+      'mimetypes',
+      ['values' => 'video/mp4']
     );
   }
 

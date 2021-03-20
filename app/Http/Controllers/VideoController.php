@@ -13,7 +13,6 @@ class VideoController extends BasicCrudController
 
   public function __construct()
   {
-    $MAX_FILE_SIZE = static::MAX_FILE_SIZE;
     $this->rules = [
       'title' => 'required|max:255',
       'description' => 'required',
@@ -23,7 +22,10 @@ class VideoController extends BasicCrudController
       'duration' => 'required|integer',
       'categories_id' => 'required|array|exists:categories,id,deleted_at,NULL',
       'genres_id' => ['required', 'array', 'exists:genres,id,deleted_at,NULL'],
-      'video_file' => "file|max:$MAX_FILE_SIZE|mimetypes:video/mp4"
+      'video_file' => "file|mimetypes:video/mp4|max:" . Video::VIDEO_FILE_MAX_SIZE,
+      'thumb_file' => 'image|max:' . Video::THUMB_FILE_MAX_SIZE,
+      'banner_file' => "image|max:" . Video::BANNER_FILE_MAX_SIZE,
+      'trailer_file' => "file|mimetypes:video/mp4|max:" . Video::TRAILER_FILE_MAX_SIZE,
     ];
   }
 

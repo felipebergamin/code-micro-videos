@@ -13,6 +13,10 @@ class Video extends Model
   use HasFactory, Traits\Uuid, SoftDeletes, UploadFiles;
 
   const RATING_LIST = ['L', '10', '12', '14', '16', '18'];
+  const VIDEO_FILE_MAX_SIZE = 1024 * 1024 * 5;
+  const THUMB_FILE_MAX_SIZE = 1024 * 5;
+  const BANNER_FILE_MAX_SIZE = 1024 * 10;
+  const TRAILER_FILE_MAX_SIZE = 1024 * 1024 * 1;
 
   protected $fillable = [
     'title',
@@ -22,7 +26,9 @@ class Video extends Model
     'rating',
     'duration',
     'video_file',
-    'thumb_file'
+    'thumb_file',
+    'banner_file',
+    'trailer_file'
   ];
 
   protected $dates = ['deleted_at'];
@@ -35,7 +41,7 @@ class Video extends Model
   ];
 
   public $incrementing = false;
-  public static $fileFields = ['video_file', 'thumb_file'];
+  public static $fileFields = ['video_file', 'thumb_file', 'banner_file', 'trailer_file'];
 
   public static function create(array $attributes = [])
   {

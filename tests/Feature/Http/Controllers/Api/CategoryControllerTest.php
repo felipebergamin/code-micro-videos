@@ -2,19 +2,29 @@
 
 namespace Tests\Feature\Http\Controllers\Api;
 
+use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Tests\Stubs\Models\CategoryStub;
 use Tests\TestCase;
+use Tests\Traits\TestResources;
 use Tests\Traits\TestSaves;
 use Tests\Traits\TestValidations;
 
 class CategoryControllerTest extends TestCase
 {
-  use DatabaseMigrations, TestValidations, TestSaves;
+  use DatabaseMigrations, TestValidations, TestSaves, TestResources;
 
   /** @var Category $category */
   private $category;
+  private $serializedFields = [
+    'id',
+    'name',
+    'description',
+    'is_active',
+    'created_at',
+    'updated_at',
+    'deleted_at',
+  ];
 
   protected function setUp(): void
   {
@@ -25,14 +35,33 @@ class CategoryControllerTest extends TestCase
   public function testIndex()
   {
     $response = $this->get(route('categories.index'));
-    $response->assertStatus(200)->assertJson([$this->category->toArray()]);
+    $response
+      ->assertStatus(200)
+      ->assertJson([
+        'meta' => ['per_page' => 15]
+      ])
+      ->assertJsonStructure([
+        'data' => [
+          '*' => $this->serializedFields
+        ],
+        'meta' => [],
+        'links' => [],
+      ]);
+
+    $resource = CategoryResource::collection(collect([$this->category]));
+    $this->assertResource($response, $resource);
   }
 
   public function testShow()
   {
-    $response = $this->get(route('categories.show', ['category' => $this->category->id]));
+    $response = $this->json('GET', route('categories.show', ['category' => $this->category->id]));
+    $response->assertStatus(200)->assertJsonStructure([
+      'data' => $this->serializedFields,
+    ]);
 
-    $response->assertStatus(200)->assertJson($this->category->toArray());
+    $id = $response->json('data.id');
+    $resource = new CategoryResource(Category::find($id));
+    $this->assertResource($response, $resource);
   }
 
   public function testStore()
@@ -45,14 +74,18 @@ class CategoryControllerTest extends TestCase
       'description' => 'description',
       'is_active' => false
     ];
-    $this
+    $response = $this
       ->assertStore(
         $data,
         $data + ['description' => 'description', 'is_active' => false, 'deleted_at' => null]
       )
       ->assertJsonStructure([
-        'created_at', 'updated_at'
+        'data' => $this->serializedFields
       ]);
+
+    $id = $response->json('data.id');
+    $resource = new CategoryResource(Category::find($id));
+    $this->assertResource($response, $resource);
   }
 
   public function testUpdate()
@@ -66,11 +99,13 @@ class CategoryControllerTest extends TestCase
       'description' => 'test',
       'is_active' => true,
     ];
-    $this
-      ->assertUpdate($data, $data + ['deleted_at' => null])
-      ->assertJsonStructure([
-        'created_at', 'updated_at'
-      ]);
+    $response = $this
+      ->assertUpdate($data, $data + ['deleted_at' => null]);
+    $response->assertJsonStructure([
+      'data' => $this->serializedFields,
+    ]);
+    $resource = new CategoryResource(Category::find($response->json('data.id')));
+    $this->assertResource($response, $resource);
 
     $data = [
       'name' => 'test',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\GenreResource;
 use App\Models\Genre;
 use Illuminate\Http\Request;
 
@@ -17,14 +18,14 @@ class GenreController extends BasicCrudController
   {
     $validData = $this->validate($request, $this->rulesStore());
     $self = $this;
-    $video = \DB::transaction(function () use ($request, $validData, $self) {
+    $genre = \DB::transaction(function () use ($request, $validData, $self) {
       /** @var Video */
       $obj = $this->model()::create($validData);
       $self->handleRelations($obj, $request);
       return $obj;
     });
-    $video->refresh();
-    return $video;
+    $genre->refresh();
+    return new GenreResource($genre);
   }
 
   public function update(Request $request, $id)
@@ -34,12 +35,12 @@ class GenreController extends BasicCrudController
     $validData = $this->validate($request, $this->rulesUpdate());
 
     $self = $this;
-    $video = \DB::transaction(function () use ($request, $validData, $obj, $self) {
+    $genre = \DB::transaction(function () use ($request, $validData, $obj, $self) {
       $obj->update($validData);
       $self->handleRelations($obj, $request);
       return $obj;
     });
-    return $video;
+    return new GenreResource($genre);
   }
 
   protected function handleRelations($genre, Request $request)
@@ -60,5 +61,15 @@ class GenreController extends BasicCrudController
   protected function rulesUpdate()
   {
     return $this->rules;
+  }
+
+  protected function resourceCollection()
+  {
+    return $this->resource();
+  }
+
+  protected function resource()
+  {
+    return GenreResource::class;
   }
 }

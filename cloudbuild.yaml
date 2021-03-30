@@ -40,9 +40,9 @@ steps:
     args: ["ps"]
 
   - id: "Rodando composer"
-    dir: "backend"
     name: "docker"
-    args: ["exec", "-t", "app", "composer", "install"]
+    args:
+      ["exec", "-t", "app", "composer", "install", "--working-dir=./backend/"]
 
   - id: "Copiando .env"
     dir: "backend"
@@ -56,7 +56,8 @@ steps:
 
   - id: "Rodando key:generate"
     name: "docker"
-    args: ["exec", "-t", "app", "php", "/var/www/backend/artisan", "key:generate"]
+    args:
+      ["exec", "-t", "app", "php", "/var/www/backend/artisan", "key:generate"]
 
   - id: "Rodando migrations"
     dir: "backend"

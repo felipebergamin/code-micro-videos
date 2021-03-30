@@ -4,8 +4,8 @@ steps:
     args:
       - kms
       - decrypt
-      - --ciphertext-file=./storage/credentials/google/service-account-storage.json.enc
-      - --plaintext-file=./storage/credentials/google/service-account-storage.json
+      - --ciphertext-file=./backend/storage/credentials/google/service-account-storage.json.enc
+      - --plaintext-file=./backend/storage/credentials/google/service-account-storage.json
       - --location=global
       - --keyring=testing-lesson
       - --key=service-account
@@ -41,23 +41,36 @@ steps:
 
   - id: "Rodando composer"
     name: "docker"
-    args: ["exec", "-t", "app", "composer", "install"]
+    args:
+      ["exec", "-t", "app", "composer", "install", "--working-dir=./backend/"]
 
   - id: "Copiando .env"
+    dir: "backend"
     name: "docker"
-    args: ["exec", "-t", "app", "cp", ".env.example", ".env"]
+    args:
+      ["exec", "-t", "app", "cp", "./backend/.env.example", "./backend/.env"]
 
   - id: "Copiando .env.testing"
     name: "docker"
-    args: ["exec", "-t", "app", "cp", ".env.testing.example", ".env.testing"]
+    args:
+      [
+        "exec",
+        "-t",
+        "app",
+        "cp",
+        "./backend/.env.testing.example",
+        "./backend/.env.testing",
+      ]
 
   - id: "Rodando key:generate"
     name: "docker"
-    args: ["exec", "-t", "app", "php", "/var/www/artisan", "key:generate"]
+    args:
+      ["exec", "-t", "app", "php", "/var/www/backend/artisan", "key:generate"]
 
   - id: "Rodando migrations"
+    dir: "backend"
     name: "docker"
-    args: ["exec", "-t", "app", "php", "/var/www/artisan", "migrate"]
+    args: ["exec", "-t", "app", "php", "/var/www/backend/artisan", "migrate"]
 
   - id: "Rodando Phpunit"
     name: "docker"
@@ -67,7 +80,7 @@ steps:
         "-t",
         "app",
         "php",
-        "/var/www/vendor/bin/phpunit",
+        "/var/www/backend/vendor/bin/phpunit",
         "-c",
-        "/var/www/phpunit.xml",
+        "/var/www/backend/phpunit.xml",
       ]

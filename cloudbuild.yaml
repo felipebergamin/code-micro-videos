@@ -47,12 +47,20 @@ steps:
   - id: "Copiando .env"
     dir: "backend"
     name: "docker"
-    args: ["exec", "-t", "app", "cp", ".env.example", ".env"]
+    args:
+      ["exec", "-t", "app", "cp", "./backend/.env.example", "./backend/.env"]
 
   - id: "Copiando .env.testing"
-    dir: "backend"
     name: "docker"
-    args: ["exec", "-t", "app", "cp", ".env.testing.example", ".env.testing"]
+    args:
+      [
+        "exec",
+        "-t",
+        "app",
+        "cp",
+        "./backend/.env.testing.example",
+        "./backend/.env.testing",
+      ]
 
   - id: "Rodando key:generate"
     name: "docker"

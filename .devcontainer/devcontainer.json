@@ -27,7 +27,7 @@
 	"karye.prettier-php",
 	"dbaeumer.vscode-eslint",
 	"ms-vscode.vscode-typescript-tslint-plugin",
-	"dsznajder.es7-react-js-snippets"
+	"rocketseat.rocketseatreactjs"
 ]
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],

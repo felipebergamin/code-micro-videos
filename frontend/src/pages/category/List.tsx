@@ -1,4 +1,3 @@
-import React from 'react';
 import Page from '../../components/Page';
 
 const List: React.FC = () => {
@@ -6,7 +5,7 @@ const List: React.FC = () => {
     <Page title="Listar categorias">
       <div />
     </Page>
-  )
-}
+  );
+};
 
 export default List;

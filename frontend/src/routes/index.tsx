@@ -22,7 +22,7 @@ const routes: MyRouteProps[] = [
     path: '/categories',
     component: CategoryList,
     exact: true,
-  }
+  },
 ];
 
 export default routes;

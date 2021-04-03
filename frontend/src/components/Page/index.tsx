@@ -19,7 +19,7 @@ const Page: React.FC<PageProps> = ({ title, children }) => {
       </Typography>
       {children}
     </Container>
-  )
-}
+  );
+};
 
 export default Page;

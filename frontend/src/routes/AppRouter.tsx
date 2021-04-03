@@ -1,5 +1,5 @@
-import {Route, Switch} from 'react-router-dom';
-import routes from './index';
+import { Route, Switch } from "react-router-dom";
+import routes from "./index";
 
 const AppRouter: React.FC = () => {
   return (
@@ -8,7 +8,7 @@ const AppRouter: React.FC = () => {
         <Route key={key} {...route} />
       ))}
     </Switch>
-  )
-}
+  );
+};
 
 export default AppRouter;

@@ -10,6 +10,7 @@ RUN apk add --no-cache shadow \
   freetype-dev \
   libjpeg-turbo-dev \
   libpng-dev
+RUN apk --no-cache add yarn --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
 
 RUN touch /root/.bashrc | echo "PS1='\w\$ '" >> /root/.bashrc
 

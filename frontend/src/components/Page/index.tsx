@@ -1,4 +1,4 @@
-import { Container, makeStyles, Typography } from '@material-ui/core';
+import { Container, makeStyles, Typography, Box } from '@material-ui/core';
 
 type PageProps = {
   title: string;
@@ -17,7 +17,7 @@ const Page: React.FC<PageProps> = ({ title, children }) => {
       <Typography className={styles.title} variant="h5">
         {title}
       </Typography>
-      {children}
+      <Box paddingBottom={2}>{children}</Box>
     </Container>
   );
 };

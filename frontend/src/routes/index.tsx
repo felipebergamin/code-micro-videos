@@ -3,6 +3,7 @@ import { RouteProps } from 'react-router-dom';
 import Dashboard from '../pages/Dashboard';
 import CategoryList from '../pages/category/PageList';
 import CastMembersList from '../pages/cast_members/PageList';
+import GenresList from '../pages/genres/PageList';
 
 export interface MyRouteProps extends RouteProps {
   label: string;
@@ -36,6 +37,12 @@ const routes: MyRouteProps[] = [
     label: 'Membros de elenco',
     path: '/cast_membrs/list',
     component: CastMembersList,
+  },
+  {
+    name: 'genres.list',
+    label: 'Gêneros de títulos',
+    path: '/genres/list',
+    component: GenresList,
   },
 ];
 

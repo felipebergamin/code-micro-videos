@@ -1,4 +1,7 @@
-import MUITable, { MUIDataTable, MUIDataTableColumn } from 'mui-datatables';
+import { useEffect, useState } from 'react';
+import MUITable, { MUIDataTableColumn } from 'mui-datatables';
+
+import { httpVideo } from '../../utils/http';
 
 const columnsDefinitions: MUIDataTableColumn[] = [
   {
@@ -15,30 +18,36 @@ const columnsDefinitions: MUIDataTableColumn[] = [
   },
 ];
 
-const data = [
-  {
-    name: 'teste',
-    isActive: true,
-    created_at: '2019-12-13',
-  },
-  {
-    name: 'teste2',
-    isActive: true,
-    created_at: '2019-12-14',
-  },
-  {
-    name: 'teste3',
-    isActive: true,
-    created_at: '2019-12-15',
-  },
-  {
-    name: 'teste4',
-    isActive: true,
-    created_at: '2019-12-16',
-  },
-];
+// const data = [
+//   {
+//     name: 'teste',
+//     isActive: true,
+//     created_at: '2019-12-13',
+//   },
+//   {
+//     name: 'teste2',
+//     isActive: true,
+//     created_at: '2019-12-14',
+//   },
+//   {
+//     name: 'teste3',
+//     isActive: true,
+//     created_at: '2019-12-15',
+//   },
+//   {
+//     name: 'teste4',
+//     isActive: true,
+//     created_at: '2019-12-16',
+//   },
+// ];
 
 const Table: React.FC = () => {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    httpVideo.get('categories').then((response) => {
+      setData(response.data.data);
+    });
+  }, []);
   return (
     <MUITable
       columns={columnsDefinitions}

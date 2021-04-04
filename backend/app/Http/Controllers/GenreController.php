@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\GenreResource;
 use App\Models\Genre;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class GenreController extends BasicCrudController
 {
@@ -13,6 +14,16 @@ class GenreController extends BasicCrudController
     'is_active' => 'boolean',
     'categories_id' => 'required|array|exists:categories,id,deleted_at,NULL'
   ];
+
+  public function index()
+  {
+    $data = !$this->paginationSize ? $this->model()::all()->with('categories') : $this->model()::with('categories')->paginate($this->paginationSize);
+    $resourceCollectionClass = $this->resourceCollection();
+    $refClass = new \ReflectionClass($resourceCollectionClass);
+    return $refClass->isSubclassOf(ResourceCollection::class)
+      ? new $resourceCollectionClass($data)
+      : $resourceCollectionClass::collection($data);
+  }
 
   public function store(Request $request)
   {

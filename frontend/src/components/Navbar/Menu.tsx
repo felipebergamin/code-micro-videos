@@ -50,7 +50,6 @@ const Menu: React.FC = () => {
             </MenuItem>
           );
         })}
-        <MenuItem onClick={handleClose}>Categorias</MenuItem>
       </MuiMenu>
     </>
   );

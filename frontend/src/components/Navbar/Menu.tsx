@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 import routes from '../../routes';
 
-const listRoutes = ['dashboard', 'categories.list'];
+const listRoutes = ['dashboard', 'categories.list', 'cast_members.list'];
 const menuRoutes = routes.filter((route) => listRoutes.includes(route.name));
 
 const Menu: React.FC = () => {

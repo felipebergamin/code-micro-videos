@@ -3,7 +3,7 @@ import MUITable, { MUIDataTableColumn } from 'mui-datatables';
 import Chip from '@material-ui/core/Chip';
 import { format, parseISO } from 'date-fns';
 
-import { httpVideo } from '../../utils/http';
+import categoryHttp, { Category } from '../../utils/http/category-http';
 
 const columnsDefinitions: MUIDataTableColumn[] = [
   {
@@ -34,41 +34,16 @@ const columnsDefinitions: MUIDataTableColumn[] = [
   },
 ];
 
-// const data = [
-//   {
-//     name: 'teste',
-//     isActive: true,
-//     created_at: '2019-12-13',
-//   },
-//   {
-//     name: 'teste2',
-//     isActive: true,
-//     created_at: '2019-12-14',
-//   },
-//   {
-//     name: 'teste3',
-//     isActive: true,
-//     created_at: '2019-12-15',
-//   },
-//   {
-//     name: 'teste4',
-//     isActive: true,
-//     created_at: '2019-12-16',
-//   },
-// ];
-
 const Table: React.FC = () => {
-  const [data, setData] = useState([]);
+  const [tableData, setTableData] = useState<Category[]>([]);
   useEffect(() => {
-    httpVideo.get('categories').then((response) => {
-      setData(response.data.data);
-    });
+    categoryHttp.list().then(({ data: { data } }) => setTableData(data));
   }, []);
   return (
     <MUITable
       columns={columnsDefinitions}
       title="Listagem de categorias"
-      data={data}
+      data={tableData}
     />
   );
 };

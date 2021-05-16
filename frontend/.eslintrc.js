@@ -30,6 +30,7 @@ module.exports = {
     'react/prop-types': 'off',
     'react/jsx-props-no-spreading': 'off',
     'react/require-default-props': 'off',
+    'no-useless-constructor': 'off',
     'react/jsx-filename-extension': [
       'error',
       {

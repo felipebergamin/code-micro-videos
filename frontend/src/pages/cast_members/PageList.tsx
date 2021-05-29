@@ -15,7 +15,7 @@ const StaffList: React.FC = () => {
           title="Adicionar categoria"
           size="small"
           component={Link}
-          to="/categories/create"
+          to="/cast_members/create"
         >
           <AddIcon />
         </Fab>

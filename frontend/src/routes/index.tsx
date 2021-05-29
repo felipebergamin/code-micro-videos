@@ -36,7 +36,7 @@ const routes: MyRouteProps[] = [
   {
     name: 'cast_members.list',
     label: 'Membros de elenco',
-    path: '/cast_membrs/list',
+    path: '/cast_members/list',
     component: CastMembersList,
   },
   {

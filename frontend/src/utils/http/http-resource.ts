@@ -7,8 +7,8 @@ export default class HttpResource<T = any> {
     return this.http.get<{ data: T[] }>(this.resource);
   }
 
-  get(id: string): Promise<AxiosResponse<T>> {
-    return this.http.get<T>(`${this.resource}/${id}`);
+  get(id: string): Promise<AxiosResponse<{ data: T }>> {
+    return this.http.get<{ data: T }>(`${this.resource}/${id}`);
   }
 
   create(data: Omit<T, 'id'>): Promise<AxiosResponse<T>> {

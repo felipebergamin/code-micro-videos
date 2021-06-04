@@ -2,7 +2,7 @@ import { RouteProps } from 'react-router-dom';
 
 import Dashboard from '../pages/Dashboard';
 import CategoryList from '../pages/category/PageList';
-import CategoryCreate from '../pages/category/PageForm';
+import CategoryForm from '../pages/category/PageForm';
 import CastMembersList from '../pages/cast_members/PageList';
 import CastMemberCreate from '../pages/cast_members/PageForm';
 import GenresList from '../pages/genres/PageList';
@@ -32,7 +32,14 @@ const routes: MyRouteProps[] = [
     name: 'categories.create',
     label: 'Criar Categoria',
     path: '/categories/create',
-    component: CategoryCreate,
+    component: CategoryForm,
+    exact: true,
+  },
+  {
+    name: 'categories.edit',
+    label: 'Editar Categoria',
+    path: '/categories/:id/edit',
+    component: CategoryForm,
     exact: true,
   },
   {

@@ -1,6 +1,7 @@
-import { BaseSyntheticEvent } from 'react';
+import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { useHistory } from 'react-router';
+import { useHistory, useParams } from 'react-router';
+import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Checkbox,
   TextField,
@@ -11,7 +12,12 @@ import {
   Theme,
 } from '@material-ui/core';
 
-import categoryHttp from '../../utils/http/category-http';
+import * as yup from '../../utils/vendor/yup';
+import categoryHttp, { Category } from '../../utils/http/category-http';
+
+export interface FormParams {
+  id: string | undefined;
+}
 
 const buttonProps: ButtonProps = {
   variant: 'outlined',
@@ -23,35 +29,84 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
+const Constants = {
+  InputLabelProps: { shrink: true },
+  defaultValues: {
+    name: '',
+    description: '',
+    is_active: true,
+  },
+};
+
+const validationSchema = yup.object().shape({
+  name: yup.string().label('Nome').max(255).required(),
+});
+
 const Form: React.FC = () => {
   const { goBack } = useHistory();
-  const { control, register, handleSubmit, getValues } = useForm();
+  const {
+    control,
+    handleSubmit,
+    getValues,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: Constants.defaultValues,
+    resolver: yupResolver(validationSchema),
+  });
+  const { id } = useParams<FormParams>();
+  const [category, setCategory] = useState<Category | null>(null);
   const styles = useStyles();
 
   const onSubmit = async (formData: any, event?: BaseSyntheticEvent) => {
-    await categoryHttp.create(formData);
+    if (category) await categoryHttp.update(category.id, formData);
+    else await categoryHttp.create(formData);
     if (!event) goBack();
   };
 
+  useEffect(() => {
+    if (!id) return;
+
+    categoryHttp.get(id).then(({ data: { data } }) => {
+      setCategory(data);
+      reset(data);
+    });
+  }, []);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <TextField
-        {...register('name')}
+      <Controller
+        control={control}
         name="name"
-        label="Nome"
-        margin="normal"
-        variant="outlined"
-        fullWidth
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Nome"
+            margin="normal"
+            variant="outlined"
+            InputLabelProps={Constants.InputLabelProps}
+            error={(errors as any).name !== undefined}
+            helperText={(errors as any).name && (errors as any).name.message}
+            fullWidth
+          />
+        )}
       />
-      <TextField
-        {...register('description')}
+      <Controller
+        control={control}
         name="description"
-        label="Descrição"
-        variant="outlined"
-        margin="normal"
-        rows={4}
-        multiline
-        fullWidth
+        render={({ field }) => (
+          <TextField
+            {...field}
+            value={field.value || Constants.defaultValues.description}
+            label="Descrição"
+            variant="outlined"
+            margin="normal"
+            InputLabelProps={Constants.InputLabelProps}
+            rows={4}
+            multiline
+            fullWidth
+          />
+        )}
       />
       <Controller
         name="is_active"
@@ -59,6 +114,7 @@ const Form: React.FC = () => {
         defaultValue
         render={({ field }) => (
           <Checkbox
+            {...field}
             onChange={(e) => field.onChange(e.target.checked)}
             checked={field.value}
           />

@@ -2,6 +2,7 @@ import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useHistory, useParams } from 'react-router';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useSnackbar } from 'notistack';
 import {
   Checkbox,
   TextField,
@@ -43,6 +44,8 @@ const validationSchema = yup.object().shape({
 });
 
 const Form: React.FC = () => {
+  const snackbar = useSnackbar();
+  const [loading, setLoading] = useState(false);
   const { goBack } = useHistory();
   const {
     control,
@@ -59,18 +62,41 @@ const Form: React.FC = () => {
   const styles = useStyles();
 
   const onSubmit = async (formData: any, event?: BaseSyntheticEvent) => {
-    if (category) await categoryHttp.update(category.id, formData);
-    else await categoryHttp.create(formData);
+    setLoading(true);
+    try {
+      if (category) await categoryHttp.update(category.id, formData);
+      else await categoryHttp.create(formData);
+      snackbar.enqueueSnackbar('Salvo com sucesso!', {
+        variant: 'success',
+      });
+    } catch (e) {
+      snackbar.enqueueSnackbar('Houve um erro ao salvar', {
+        variant: 'error',
+      });
+    }
+    setLoading(false);
     if (!event) goBack();
   };
 
   useEffect(() => {
     if (!id) return;
 
-    categoryHttp.get(id).then(({ data: { data } }) => {
-      setCategory(data);
-      reset(data);
-    });
+    const loadCategoryInfo = async () => {
+      setLoading(true);
+      try {
+        const {
+          data: { data },
+        } = await categoryHttp.get(id);
+        setCategory(data);
+        reset(data);
+      } catch (e) {
+        snackbar.enqueueSnackbar('Houve um erro ao carregar as informações', {
+          variant: 'error',
+        });
+      }
+      setLoading(false);
+    };
+    loadCategoryInfo();
   }, []);
 
   return (
@@ -84,6 +110,7 @@ const Form: React.FC = () => {
             label="Nome"
             margin="normal"
             variant="outlined"
+            disabled={loading}
             InputLabelProps={Constants.InputLabelProps}
             error={(errors as any).name !== undefined}
             helperText={(errors as any).name && (errors as any).name.message}
@@ -101,6 +128,7 @@ const Form: React.FC = () => {
             label="Descrição"
             variant="outlined"
             margin="normal"
+            disabled={loading}
             InputLabelProps={Constants.InputLabelProps}
             rows={4}
             multiline

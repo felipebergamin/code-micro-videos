@@ -4,10 +4,11 @@ import Breadcrumbs from './components/Breadcrumb';
 
 import Navbar from './components/Navbar';
 import AppRouter from './routes/AppRouter';
+import SnackbarProvider from './components/SnackbarProvider';
 
 function App(): JSX.Element {
   return (
-    <>
+    <SnackbarProvider>
       <BrowserRouter>
         <Navbar />
         <Box paddingTop="80px">
@@ -15,7 +16,7 @@ function App(): JSX.Element {
           <AppRouter />
         </Box>
       </BrowserRouter>
-    </>
+    </SnackbarProvider>
   );
 }
 

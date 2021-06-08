@@ -20,6 +20,6 @@ class Genre extends Model
 
   public function categories()
   {
-    return $this->belongsToMany(Category::class)->withTrashed();
+    return $this->belongsToMany(Category::class);
   }
 }

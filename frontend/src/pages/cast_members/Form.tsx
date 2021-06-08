@@ -1,6 +1,8 @@
-import { BaseSyntheticEvent } from 'react';
+import { BaseSyntheticEvent, useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { useHistory } from 'react-router';
+import { useHistory, useParams } from 'react-router';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useSnackbar } from 'notistack';
 import {
   TextField,
   Box,
@@ -13,9 +15,11 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  FormHelperText,
 } from '@material-ui/core';
 
-import castMemberHttp from '../../utils/http/cast-member-http';
+import castMemberHttp, { CastMember } from '../../utils/http/cast-member-http';
+import * as yup from '../../utils/vendor/yup';
 
 const buttonProps: ButtonProps = {
   variant: 'outlined',
@@ -29,38 +33,118 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const Constants = {
   memberTypes: [
-    ['Diretor', '1'],
-    ['Ator', '2'],
+    ['Diretor', 1],
+    ['Ator', 2],
   ],
 };
 
+const validationSchema = yup.object().shape({
+  name: yup.string().label('Nome').required().max(255),
+  type: yup.number().label('Tipo').required(),
+});
+
+interface FormProps {
+  name: string;
+  type: number;
+}
+
 const Form: React.FC = () => {
-  const { goBack } = useHistory();
-  const { control, register, handleSubmit, getValues } = useForm();
+  const history = useHistory();
+  const [loading, setLoading] = useState(false);
+  const [castMember, setCastMember] = useState<CastMember | null>(null);
+  const { id } = useParams<{ id?: string }>();
+  const snackbar = useSnackbar();
+  const {
+    control,
+    handleSubmit,
+    getValues,
+    reset,
+    formState: { errors },
+  } = useForm<FormProps>({
+    resolver: yupResolver(validationSchema),
+    defaultValues: {
+      name: '',
+      type: 0,
+    },
+  });
   const styles = useStyles();
 
-  const onSubmit = async (formData: any, event?: BaseSyntheticEvent) => {
-    await castMemberHttp.create(formData);
-    if (!event) goBack();
-  };
+  useEffect(() => {
+    async function getCastMember() {
+      if (!id) {
+        return;
+      }
+      setLoading(true);
+      try {
+        const {
+          data: { data },
+        } = await castMemberHttp.get(id);
+        setCastMember(data);
+        reset(data);
+      } catch (error) {
+        snackbar.enqueueSnackbar('Não foi possível carregar as informações', {
+          variant: 'error',
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    getCastMember();
+  }, []);
+
+  async function onSubmit(formData: any, event?: BaseSyntheticEvent) {
+    setLoading(true);
+    try {
+      const { data } = await (!castMember
+        ? castMemberHttp.create(formData)
+        : castMemberHttp.update(castMember.id, formData));
+      snackbar.enqueueSnackbar('Membro de elenco salvo com sucesso', {
+        variant: 'success',
+      });
+      if (event) {
+        if (id) history.replace(`/cast_members/${data.data.id}/edit`);
+        else history.push(`/cast_members/${data.data.id}/edit`);
+      } else {
+        history.push('/cast_members/list');
+      }
+    } catch (error) {
+      snackbar.enqueueSnackbar('Não foi possível salvar o membro de elenco', {
+        variant: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <TextField
-        {...register('name')}
+      <Controller
+        control={control}
         name="name"
-        label="Nome"
-        margin="normal"
-        variant="outlined"
-        fullWidth
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Nome"
+            margin="normal"
+            variant="outlined"
+            disabled={loading}
+            error={(errors as any).name !== undefined}
+            helperText={(errors as any).name && (errors as any).name.message}
+            fullWidth
+          />
+        )}
       />
       <Controller
         name="type"
         control={control}
         render={({ field }) => (
-          <FormControl margin="normal" component="fieldset" {...field}>
+          <FormControl margin="normal" disabled={loading} component="fieldset">
             <FormLabel component="legend">Tipo</FormLabel>
-            <RadioGroup aria-label="gender">
+            <RadioGroup
+              aria-label="gender"
+              {...field}
+              value={Number(field.value)}
+            >
               {Constants.memberTypes.map(([label, value]) => (
                 <FormControlLabel
                   key={label}
@@ -70,6 +154,11 @@ const Form: React.FC = () => {
                 />
               ))}
             </RadioGroup>
+            {errors.type && (
+              <FormHelperText id="type-helper-text">
+                {errors.type.message}
+              </FormHelperText>
+            )}
           </FormControl>
         )}
       />

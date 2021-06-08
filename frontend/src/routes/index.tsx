@@ -4,7 +4,7 @@ import Dashboard from '../pages/Dashboard';
 import CategoryList from '../pages/category/PageList';
 import CategoryForm from '../pages/category/PageForm';
 import CastMembersList from '../pages/cast_members/PageList';
-import CastMemberCreate from '../pages/cast_members/PageForm';
+import CastMemberForm from '../pages/cast_members/PageForm';
 import GenresList from '../pages/genres/PageList';
 import GenresForm from '../pages/genres/PageForm';
 
@@ -52,7 +52,14 @@ const routes: MyRouteProps[] = [
     name: 'cast_members.create',
     label: 'Adicionar membro de elenco',
     path: '/cast_members/create',
-    component: CastMemberCreate,
+    component: CastMemberForm,
+  },
+  {
+    name: 'cast_members.edit',
+    label: 'Editar membro de elenco',
+    path: '/cast_members/:id/edit',
+    component: CastMemberForm,
+    exact: true,
   },
   {
     name: 'genres.list',

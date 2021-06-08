@@ -6,7 +6,7 @@ import CategoryForm from '../pages/category/PageForm';
 import CastMembersList from '../pages/cast_members/PageList';
 import CastMemberCreate from '../pages/cast_members/PageForm';
 import GenresList from '../pages/genres/PageList';
-import GenresCreate from '../pages/genres/PageForm';
+import GenresForm from '../pages/genres/PageForm';
 
 export interface MyRouteProps extends RouteProps {
   label: string;
@@ -64,7 +64,13 @@ const routes: MyRouteProps[] = [
     name: 'genres.create',
     label: 'Adicionar novo gênero',
     path: '/genres/create',
-    component: GenresCreate,
+    component: GenresForm,
+  },
+  {
+    name: 'genres.edit',
+    label: 'Editar gênero',
+    path: '/genres/:id/edit',
+    component: GenresForm,
   },
 ];
 

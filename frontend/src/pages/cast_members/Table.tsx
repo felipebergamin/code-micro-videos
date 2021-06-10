@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/Edit';
 
 import { httpVideo } from '../../utils/http';
+import { CastMember } from '../../utils/http/cast-member-http';
 
 const MEMBER_TYPES: { [key: number]: string | undefined } = {
   1: 'Diretor',
@@ -63,7 +64,7 @@ const columnsDefinitions: MUIDataTableColumn[] = [
 ];
 
 const Table: React.FC = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<CastMember[]>([]);
   useEffect(() => {
     httpVideo.get('cast_members').then((response) => {
       setData(response.data.data);

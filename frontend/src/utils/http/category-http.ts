@@ -1,10 +1,6 @@
 import { httpVideo } from '.';
 import HttpResource from './http-resource';
-
-export type Category = {
-  id: string;
-  name: string;
-};
+import { Category } from '../models';
 
 const categoryHttp = new HttpResource<Category>(httpVideo, 'categories');
 

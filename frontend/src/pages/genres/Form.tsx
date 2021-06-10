@@ -21,6 +21,7 @@ import {
 import genresHttp, { Genre } from '../../utils/http/genres-http';
 import categoryHttp, { Category } from '../../utils/http/category-http';
 import * as yup from '../../utils/vendor/yup';
+import DefaultForm from '../../components/DefaultForm';
 
 const buttonProps: ButtonProps = {
   variant: 'outlined',
@@ -127,7 +128,10 @@ const Form: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <DefaultForm
+      GridItemProps={{ xs: 12, md: 6 }}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Controller
         name="name"
         control={control}
@@ -193,7 +197,7 @@ const Form: React.FC = () => {
           Salvar
         </Button>
       </Box>
-    </form>
+    </DefaultForm>
   );
 };
 

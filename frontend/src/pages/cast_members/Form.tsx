@@ -18,6 +18,8 @@ import {
   FormHelperText,
 } from '@material-ui/core';
 
+import SubmitActions from '../../components/SubmitActions';
+import DefaultForm from '../../components/DefaultForm';
 import castMemberHttp, { CastMember } from '../../utils/http/cast-member-http';
 import * as yup from '../../utils/vendor/yup';
 
@@ -59,6 +61,7 @@ const Form: React.FC = () => {
     handleSubmit,
     getValues,
     reset,
+    trigger,
     formState: { errors },
   } = useForm<FormProps>({
     resolver: yupResolver(validationSchema),
@@ -117,7 +120,10 @@ const Form: React.FC = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <DefaultForm
+      GridItemProps={{ xs: 12, md: 6 }}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Controller
         control={control}
         name="name"
@@ -162,19 +168,15 @@ const Form: React.FC = () => {
           </FormControl>
         )}
       />
-      <Box dir="rtl">
-        <Button className={styles.submit} {...buttonProps} type="submit">
-          Salvar e continuar editando
-        </Button>
-        <Button
-          className={styles.submit}
-          {...buttonProps}
-          onClick={() => onSubmit(getValues())}
-        >
-          Salvar
-        </Button>
-      </Box>
-    </form>
+      <SubmitActions
+        disabledButtons={loading}
+        handleSave={() =>
+          trigger().then((isValid) => {
+            if (isValid) onSubmit(getValues());
+          })
+        }
+      />
+    </DefaultForm>
   );
 };
 

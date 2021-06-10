@@ -7,6 +7,7 @@ import { IconButton } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
 import { httpVideo } from '../../utils/http';
+import { Genre } from '../../utils/http/genres-http';
 
 const columnsDefinitions: MUIDataTableColumn[] = [
   {
@@ -76,7 +77,7 @@ const columnsDefinitions: MUIDataTableColumn[] = [
 ];
 
 const Table: React.FC = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Genre[]>([]);
   useEffect(() => {
     httpVideo.get('genres').then((response) => {
       setData(response.data.data);

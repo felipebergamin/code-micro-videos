@@ -3,32 +3,16 @@ import { useForm, Controller } from 'react-hook-form';
 import { useHistory, useParams } from 'react-router';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useSnackbar } from 'notistack';
-import {
-  Checkbox,
-  TextField,
-  Box,
-  Button,
-  ButtonProps,
-  makeStyles,
-  Theme,
-} from '@material-ui/core';
+import { Checkbox, TextField } from '@material-ui/core';
 
 import * as yup from '../../utils/vendor/yup';
 import categoryHttp, { Category } from '../../utils/http/category-http';
+import SubmitActions from '../../components/SubmitActions';
+import DefaultForm from '../../components/DefaultForm';
 
 export interface FormParams {
   id: string | undefined;
 }
-
-const buttonProps: ButtonProps = {
-  variant: 'outlined',
-};
-
-const useStyles = makeStyles((theme: Theme) => ({
-  submit: {
-    margin: theme.spacing(1),
-  },
-}));
 
 const Constants = {
   InputLabelProps: { shrink: true },
@@ -52,6 +36,7 @@ const Form: React.FC = () => {
     handleSubmit,
     getValues,
     reset,
+    trigger,
     formState: { errors },
   } = useForm({
     defaultValues: Constants.defaultValues,
@@ -59,7 +44,6 @@ const Form: React.FC = () => {
   });
   const { id } = useParams<FormParams>();
   const [category, setCategory] = useState<Category | null>(null);
-  const styles = useStyles();
 
   const onSubmit = async (formData: any, event?: BaseSyntheticEvent) => {
     setLoading(true);
@@ -100,7 +84,10 @@ const Form: React.FC = () => {
   }, []);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <DefaultForm
+      GridItemProps={{ xs: 12, md: 6 }}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Controller
         control={control}
         name="name"
@@ -148,19 +135,15 @@ const Form: React.FC = () => {
           />
         )}
       />
-      <Box dir="rtl">
-        <Button className={styles.submit} {...buttonProps} type="submit">
-          Salvar e continuar editando
-        </Button>
-        <Button
-          className={styles.submit}
-          {...buttonProps}
-          onClick={() => onSubmit(getValues())}
-        >
-          Salvar
-        </Button>
-      </Box>
-    </form>
+      <SubmitActions
+        disabledButtons={loading}
+        handleSave={() =>
+          trigger().then((isValid) => {
+            if (isValid) onSubmit(getValues());
+          })
+        }
+      />
+    </DefaultForm>
   );
 };
 

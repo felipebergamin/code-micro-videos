@@ -2,23 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Traits\Uuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CastMember extends Model
 {
-  use HasFactory, SoftDeletes, Traits\Uuid;
+    use SoftDeletes, Uuid;
 
-  const TYPES = ['DIRECTOR' => 1, 'ACTOR' => 2];
+    const TYPE_DIRECTOR = 1;
+    const TYPE_ACTOR = 2;
 
-  protected $fillable = ['name', 'type'];
-
-  protected $dates = ['created_at', 'updated_at', 'deleted_at'];
-
-  protected $casts = [
-    'id' => 'string'
-  ];
-
-  public $incrementing = false;
+    protected $fillable = ['name', 'type'];
+    protected $dates = ['deleted_at'];
+    public $incrementing = false;
+    protected $casts = [
+        'id' => 'string',
+        'type' => 'integer'
+    ];
 }

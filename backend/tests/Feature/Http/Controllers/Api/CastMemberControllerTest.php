@@ -1,6 +1,8 @@
 <?php
 
+
 namespace Tests\Feature\Http\Controllers\Api;
+
 
 use App\Http\Resources\CastMemberResource;
 use App\Models\CastMember;
@@ -12,130 +14,132 @@ use Tests\Traits\TestValidations;
 
 class CastMemberControllerTest extends TestCase
 {
-  use DatabaseMigrations, TestValidations, TestSaves, TestResources;
+    use DatabaseMigrations, TestValidations, TestSaves, TestResources;
 
-  /** @var CastMember */
-  private $castMember;
 
-  private $serializedFields = [
-    'id',
-    'name',
-    'type',
-    'created_at',
-    'updated_at',
-    'deleted_at',
-  ];
-
-  protected function setUp(): void
-  {
-    parent::setUp();
-    $this->castMember = CastMember::factory()->create();
-  }
-
-  public function testIndex()
-  {
-    $response = $this->get(route('cast_members.index'));
-    $response
-      ->assertJsonStructure([
-        'data' => ['*' => $this->serializedFields],
-        'meta' => [],
-        'links' => [],
-      ])
-      ->assertJson(['meta' => ['per_page' => 15]])
-      ->assertStatus(200);
-
-    $resource = CastMemberResource::collection(collect([$this->castMember]));
-    $this->assertResource($response, $resource);
-  }
-
-  public function testShow()
-  {
-    $response = $this->get(route('cast_members.show', ['cast_member' => $this->castMember->id]));
-    $response->assertStatus(200)->assertJsonStructure([
-      'data' => $this->serializedFields
-    ]);
-
-    $id = $response->json('data.id');
-    $resource = new CastMemberResource(CastMember::find($id));
-    $this->assertResource($response, $resource);
-  }
-
-  public function testStore()
-  {
-    $data = ['name' => 'test', 'type' => CastMember::TYPES['DIRECTOR']];
-    $this->assertStore($data, $data + ['deleted_at' => null]);
-
-    $data = ['name' => 'test', 'type' => CastMember::TYPES['ACTOR']];
-    $response = $this
-      ->assertStore(
-        $data,
-        $data + ['deleted_at' => null]
-      )
-      ->assertJsonStructure([
-        'data' => $this->serializedFields,
-      ]);
-
-    $id = $response->json('data.id');
-    $resource = new CastMemberResource(CastMember::find($id));
-    $this->assertResource($response, $resource);
-  }
-
-  public function testUpdate()
-  {
-    $this->castMember = CastMember::factory()->create([
-      'name' => 'First Name',
-      'type' => CastMember::TYPES['ACTOR'],
-    ]);
-    $data = [
-      'name' => 'Second Name',
-      'type' => CastMember::TYPES['DIRECTOR']
+    private $castMember;
+    private $fieldsSerialized = [
+        'id',
+        'name',
+        'type',
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
-    $this
-      ->assertUpdate($data, $data + ['deleted_at' => null])
-      ->assertJsonStructure([
-        'data' => $this->serializedFields
-      ]);
-  }
 
-  public function testValidationData()
-  {
-    $data = ['name' => ''];
-    $this->assertInvalidationInStoreAction($data, 'required');
-    $this->assertInvalidationInUpdateAction($data, 'required');
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->castMember = factory(CastMember::class)->create([
+            'type' => CastMember::TYPE_DIRECTOR
+        ]);
+    }
 
-    $data = ['type' => ''];
-    $this->assertInvalidationInStoreAction($data, 'required');
-    $this->assertInvalidationInUpdateAction($data, 'required');
+    public function testIndex()
+    {
+        $response = $this->get(route('cast_members.index'));
 
-    $data = ['type' => 'abcd'];
-    $this->assertInvalidationInStoreAction($data, 'in');
-    $this->assertInvalidationInUpdateAction($data, 'in');
-  }
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure(
+                [
+                    'data' => [
+                        '*' => $this->fieldsSerialized
+                    ],
+                    'meta' => [],
+                    'links' => []
+                ]
+            )
+            ->assertJsonFragment($this->castMember->toArray());
+    }
 
-  public function testDelete()
-  {
-    $this->json('DELETE', $this->routeDelete());
-    $this->assertNull(CastMember::find($this->castMember->id));
-    $this->assertNotNull(CastMember::withTrashed()->find($this->castMember->id));
-  }
+    public function testInvalidationData()
+    {
+        $data = [
+            'name' => '',
+            'type' => ''
+        ];
+        $this->assertInvalidationInStoreAction($data, 'required');
+        $this->assertInvalidationInUpdateAction($data, 'required');
 
-  protected function routeStore()
-  {
-    return route('cast_members.store');
-  }
+        $data = [
+            'type' => 's'
+        ];
+        $this->assertInvalidationInStoreAction($data, 'in');
+        $this->assertInvalidationInUpdateAction($data, 'in');
+    }
 
-  protected function routeUpdate()
-  {
-    return route('cast_members.update', ['cast_member' => $this->castMember->id]);
-  }
+    public function testStore()
+    {
+        $data = [
+            [
+                'name' => 'test',
+                'type' => CastMember::TYPE_DIRECTOR
+            ],
+            [
+                'name' => 'test',
+                'type' => CastMember::TYPE_ACTOR
+            ]
+        ];
+        foreach ($data as $key => $value) {
+            $response = $this->assertStore($value, $value + ['deleted_at' => null]);
+            $response->assertJsonStructure([
+                'data' => $this->fieldsSerialized
+            ]);
+            $this->assertResource($response, new CastMemberResource(
+                CastMember::find($response->json('data.id'))
+            ));
+        }
+    }
 
-  protected function routeDelete()
-  {
-    return route('cast_members.destroy', ['cast_member' => $this->castMember->id]);
-  }
+    public function testUpdate()
+    {
+        $data = [
+            'name' => 'test',
+            'type' => CastMember::TYPE_ACTOR
+        ];
+        $response = $this->assertUpdate($data, $data + ['deleted_at' => null]);
+        $response->assertJsonStructure([
+            'data' => $this->fieldsSerialized
+        ]);
+        $this->assertResource($response, new CastMemberResource(
+            CastMember::find($response->json('data.id'))
+        ));
+    }
 
-  protected function model()
-  {
-    return CastMember::class;
-  }
+    public function testShow()
+    {
+        $response = $this->json('GET', route('cast_members.show', ['cast_member' => $this->castMember->id]));
+        $response
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => $this->fieldsSerialized
+            ])
+            ->assertJsonFragment($this->castMember->toArray());
+
+        $this->assertResource($response, new CastMemberResource($this->castMember));
+    }
+
+    public function testDestroy()
+    {
+        $response = $this->json('DELETE', route('cast_members.destroy', ['cast_member' => $this->castMember->id]));
+        $response->assertStatus(204);
+        $this->assertNull(CastMember::find($this->castMember->id));
+        $this->assertNotNull(CastMember::withTrashed()->find($this->castMember->id));
+    }
+
+    protected function model()
+    {
+        return CastMember::class;
+    }
+
+    protected function routeStore()
+    {
+        return route('cast_members.store');
+    }
+
+    protected function routeUpdate()
+    {
+        return route('cast_members.update', ['cast_member' => $this->castMember->id]);
+    }
 }

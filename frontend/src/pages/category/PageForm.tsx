@@ -1,19 +1,15 @@
-import { useParams } from 'react-router';
+import * as React from 'react';
+import {Form} from "./Form";
+import {Page} from "../../components/Page";
+import {useParams} from 'react-router';
 
-import Page from '../../components/Page';
-import Form from './Form';
-
-export interface PageFormParams {
-  id: string | undefined;
-}
-
-const PageForm = (): JSX.Element => {
-  const { id } = useParams<PageFormParams>();
-  return (
-    <Page title={id ? 'Editar categoria' : 'Criar categoria'}>
-      <Form />
-    </Page>
-  );
+const PageForm = () => {
+    const {id} = useParams();
+    return (
+        <Page title={!id ? 'Criar categoria' : 'Editar categoria'}>
+            <Form/>
+        </Page>
+    );
 };
 
 export default PageForm;

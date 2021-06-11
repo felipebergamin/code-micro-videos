@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/Edit';
 
 import { httpVideo } from '../../utils/http';
-import { CastMember } from '../../utils/http/cast-member-http';
+import { CastMember } from '../../utils/models';
 
 const MEMBER_TYPES: { [key: number]: string | undefined } = {
   1: 'Diretor',

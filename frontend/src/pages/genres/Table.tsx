@@ -7,7 +7,7 @@ import { IconButton } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
 import { httpVideo } from '../../utils/http';
-import { Genre } from '../../utils/http/genres-http';
+import { Genre } from '../../utils/models';
 
 const columnsDefinitions: MUIDataTableColumn[] = [
   {

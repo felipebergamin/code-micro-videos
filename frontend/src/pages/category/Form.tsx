@@ -6,9 +6,10 @@ import { useSnackbar } from 'notistack';
 import { Checkbox, TextField } from '@material-ui/core';
 
 import * as yup from '../../utils/vendor/yup';
-import categoryHttp, { Category } from '../../utils/http/category-http';
+import categoryHttp from '../../utils/http/category-http';
 import SubmitActions from '../../components/SubmitActions';
 import DefaultForm from '../../components/DefaultForm';
+import { Category } from '../../utils/models';
 
 export interface FormParams {
   id: string | undefined;

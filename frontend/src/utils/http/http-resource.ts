@@ -7,6 +7,14 @@ export default class HttpResource<T = any> {
     return this.http.get<{ data: T[] }>(this.resource);
   }
 
+  listAll(): Promise<AxiosResponse<{ data: T[] }>> {
+    return this.http.get<{ data: T[] }>(this.resource, {
+      params: {
+        all: '',
+      },
+    });
+  }
+
   get(id: string): Promise<AxiosResponse<{ data: T }>> {
     return this.http.get<{ data: T }>(`${this.resource}/${id}`);
   }

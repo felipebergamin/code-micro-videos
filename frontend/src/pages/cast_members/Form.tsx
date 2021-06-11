@@ -5,11 +5,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useSnackbar } from 'notistack';
 import {
   TextField,
-  Box,
-  Button,
-  ButtonProps,
-  makeStyles,
-  Theme,
   FormControl,
   FormLabel,
   RadioGroup,
@@ -20,18 +15,9 @@ import {
 
 import SubmitActions from '../../components/SubmitActions';
 import DefaultForm from '../../components/DefaultForm';
-import castMemberHttp, { CastMember } from '../../utils/http/cast-member-http';
+import castMemberHttp from '../../utils/http/cast-member-http';
 import * as yup from '../../utils/vendor/yup';
-
-const buttonProps: ButtonProps = {
-  variant: 'outlined',
-};
-
-const useStyles = makeStyles((theme: Theme) => ({
-  submit: {
-    margin: theme.spacing(1),
-  },
-}));
+import { CastMember } from '../../utils/models';
 
 const Constants = {
   memberTypes: [
@@ -70,7 +56,6 @@ const Form: React.FC = () => {
       type: 0,
     },
   });
-  const styles = useStyles();
 
   useEffect(() => {
     async function getCastMember() {

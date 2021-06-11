@@ -18,10 +18,11 @@ import {
   InputLabel,
 } from '@material-ui/core';
 
-import genresHttp, { Genre } from '../../utils/http/genres-http';
-import categoryHttp, { Category } from '../../utils/http/category-http';
+import genresHttp from '../../utils/http/genres-http';
+import categoryHttp from '../../utils/http/category-http';
 import * as yup from '../../utils/vendor/yup';
 import DefaultForm from '../../components/DefaultForm';
+import { Category, Genre } from '../../utils/models';
 
 const buttonProps: ButtonProps = {
   variant: 'outlined',

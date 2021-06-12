@@ -34,7 +34,12 @@ class BasicCrudControllerTest extends TestCase
   {
     /** @var CategoryStub $category */
     $category = CategoryStub::create(['name' => 'test_name', 'description' => 'test_description']);
-    $result = $this->controller->index();
+    /** @var MockInterface|Request */
+    $request = $this->mock(Request::class);
+    $request->shouldReceive('get')->andReturn([]);
+    $request->shouldReceive('has')->andReturn(false);
+    $request->shouldReceive('all')->andReturn([]);
+    $result = $this->controller->index($request);
     $this->assertEquals([$category->toArray()], $result->response()->getData(true)['data']);
   }
 

@@ -80,7 +80,7 @@ const Form: React.FC = () => {
   useEffect(() => {
     setLoading(false);
     const promises = [
-      categoryHttp.list().then(({ data }) => {
+      categoryHttp.listAll().then(({ data }) => {
         setCategoriesList(data.data);
       }),
     ];

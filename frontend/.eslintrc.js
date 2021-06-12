@@ -23,6 +23,7 @@ module.exports = {
   },
   plugins: ['react', 'react-hooks', 'import'],
   rules: {
+    camelcase: 'off',
     'no-use-before-define': 'off',
     '@typescript-eslint/no-use-before-define': ['error'],
     '@typescript-eslint/no-explicit-any': 'off',

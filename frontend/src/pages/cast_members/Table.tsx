@@ -79,8 +79,7 @@ const Table = (): JSX.Element => {
       .then((response) => {
         setData(response.data.data);
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
         snackbar.enqueueSnackbar('Não foi possível carregar as informações', {
           variant: 'error',
         });

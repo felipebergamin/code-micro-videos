@@ -1,10 +1,17 @@
-import { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 export default class HttpResource<T = any> {
   constructor(protected http: AxiosInstance, protected resource: string) {}
 
-  list(): Promise<AxiosResponse<{ data: T[] }>> {
-    return this.http.get<{ data: T[] }>(this.resource);
+  list(options?: {
+    queryParams?: any;
+  }): Promise<AxiosResponse<{ data: T[]; meta: { total: number } }>> {
+    return this.http.get<{ data: T[]; meta: { total: number } }>(
+      this.resource,
+      {
+        params: options?.queryParams || {},
+      },
+    );
   }
 
   listAll(): Promise<AxiosResponse<{ data: T[] }>> {
@@ -29,5 +36,10 @@ export default class HttpResource<T = any> {
 
   delete(id: string): Promise<AxiosResponse<T>> {
     return this.http.delete(`${this.resource}/${id}`);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  isCancelledRequest(error: Error): boolean {
+    return axios.isCancel(error);
   }
 }

@@ -12,11 +12,15 @@ import {
   useTheme,
 } from '@material-ui/core';
 
+import DebouncedTableSearch from './DebouncedTableSearch';
+
 export interface TableColumn extends MUIDataTableColumn {
   width?: string;
 }
 
-const defaultOptions: MUIDataTableOptions = {
+const makeDefaultOptions = (
+  debouncedSearchTime?: number,
+): MUIDataTableOptions => ({
   print: false,
   download: false,
   textLabels: {
@@ -52,17 +56,35 @@ const defaultOptions: MUIDataTableOptions = {
       deleteAria: 'Excluir registros selecionados',
     },
   },
-};
+  customSearchRender: function SearchComponent(
+    searchText: string,
+    handleSearch: any,
+    hideSearch: any,
+    options: any,
+  ) {
+    return (
+      <DebouncedTableSearch
+        searchText={searchText}
+        onSearch={handleSearch}
+        onHide={hideSearch}
+        options={options}
+        debounceTime={debouncedSearchTime}
+      />
+    );
+  },
+});
 
 export interface TableProps extends MUIDataTableProps {
   columns: TableColumn[];
   loading?: boolean;
+  debouncedSearchTime?: number;
 }
 
 const Table: React.FC<TableProps> = (props) => {
   const theme = cloneDeep<Theme>(useTheme());
   const isSmOrDown = useMediaQuery(theme.breakpoints.down('sm'));
-  const { columns } = props;
+  const { columns, debouncedSearchTime } = props;
+  const defaultOptions = makeDefaultOptions(debouncedSearchTime);
 
   function setColumnsWith(cols: TableColumn[]) {
     cols.forEach((column, key) => {

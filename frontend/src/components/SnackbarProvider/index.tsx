@@ -7,9 +7,7 @@ import { IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 
 const SnackbarProvider: React.FC = ({ children, ...rest }) => {
-  const snackbarProviderRef: React.MutableRefObject<NotistackProvider | null> = useRef(
-    null,
-  );
+  const snackbarProviderRef = useRef<NotistackProvider | null>(null);
   const defaultProps: SnackbarProviderProps = {
     children,
     autoHideDuration: 3000,

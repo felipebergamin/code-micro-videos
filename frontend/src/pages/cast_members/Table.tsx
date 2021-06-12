@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import MUITable, { MUIDataTableColumn } from 'mui-datatables';
+import { MUIDataTableColumn } from 'mui-datatables';
 import { format, parseISO } from 'date-fns';
-import { IconButton } from '@material-ui/core';
+import { IconButton, MuiThemeProvider } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/Edit';
+import { useSnackbar } from 'notistack';
 
-import { httpVideo } from '../../utils/http';
-import { CastMember } from '../../utils/models';
+import castMemberHttp from 'utils/http/cast-member-http';
+import DefaultTable, { makeActionStyles } from 'components/Table';
+import { CastMember } from 'utils/models';
 
 const MEMBER_TYPES: { [key: number]: string | undefined } = {
   1: 'Diretor',
@@ -17,6 +19,9 @@ const columnsDefinitions: MUIDataTableColumn[] = [
   {
     name: 'id',
     label: 'ID',
+    options: {
+      sort: false,
+    },
   },
   {
     name: 'name',
@@ -63,19 +68,36 @@ const columnsDefinitions: MUIDataTableColumn[] = [
   },
 ];
 
-const Table: React.FC = () => {
+const Table = (): JSX.Element => {
+  const snackbar = useSnackbar();
   const [data, setData] = useState<CastMember[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
-    httpVideo.get('cast_members').then((response) => {
-      setData(response.data.data);
-    });
+    setLoading(true);
+    castMemberHttp
+      .list()
+      .then((response) => {
+        setData(response.data.data);
+      })
+      .catch((err) => {
+        console.error(err);
+        snackbar.enqueueSnackbar('Não foi possível carregar as informações', {
+          variant: 'error',
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
   return (
-    <MUITable
-      columns={columnsDefinitions}
-      title="Membros de elenco"
-      data={data}
-    />
+    <MuiThemeProvider theme={makeActionStyles(columnsDefinitions.length - 1)}>
+      <DefaultTable
+        title=""
+        columns={columnsDefinitions}
+        data={data}
+        loading={loading}
+      />
+    </MuiThemeProvider>
   );
 };
 

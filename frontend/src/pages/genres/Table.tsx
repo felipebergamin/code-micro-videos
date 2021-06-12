@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
-import MUITable, { MUIDataTableColumn } from 'mui-datatables';
+import { MUIDataTableColumn } from 'mui-datatables';
 import Chip from '@material-ui/core/Chip';
 import { format, parseISO } from 'date-fns';
 import EditIcon from '@material-ui/icons/Edit';
-import { IconButton } from '@material-ui/core';
+import { IconButton, MuiThemeProvider } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
+import { useSnackbar } from 'notistack';
 import { httpVideo } from '../../utils/http';
 import { Genre } from '../../utils/models';
+import DefaultTable, { makeActionStyles } from '../../components/Table';
 
 const columnsDefinitions: MUIDataTableColumn[] = [
   {
@@ -77,18 +79,34 @@ const columnsDefinitions: MUIDataTableColumn[] = [
 ];
 
 const Table: React.FC = () => {
+  const snackbar = useSnackbar();
+  const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<Genre[]>([]);
   useEffect(() => {
-    httpVideo.get('genres').then((response) => {
-      setData(response.data.data);
-    });
+    setLoading(false);
+    httpVideo
+      .get('genres')
+      .then((response) => {
+        setData(response.data.data);
+      })
+      .catch(() => {
+        snackbar.enqueueSnackbar('Não foi possível carregar as informações', {
+          variant: 'error',
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
   return (
-    <MUITable
-      columns={columnsDefinitions}
-      title="Gêneros de títulos"
-      data={data}
-    />
+    <MuiThemeProvider theme={makeActionStyles(columnsDefinitions.length - 1)}>
+      <DefaultTable
+        title=""
+        columns={columnsDefinitions}
+        data={data}
+        loading={loading}
+      />
+    </MuiThemeProvider>
   );
 };
 

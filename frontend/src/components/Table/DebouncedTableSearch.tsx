@@ -119,7 +119,6 @@ class DebouncedTableSearch extends PureComponent<any, State> {
             className={classes.searchText}
             autoFocus
             InputProps={{
-              // 'data-test-id': options.textLabels.toolbar.search,
               'aria-label': options.textLabels.toolbar.search,
             }}
             value={value || ''}

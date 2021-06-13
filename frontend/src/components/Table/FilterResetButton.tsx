@@ -10,9 +10,7 @@ interface FilterResetButtonProps {
   handleClick: () => void;
 }
 
-export const FilterResetButton: FC<FilterResetButtonProps> = ({
-  handleClick,
-}) => {
+const FilterResetButton: FC<FilterResetButtonProps> = ({ handleClick }) => {
   const classes = useStyles();
   return (
     <Tooltip title="Limpar busca">

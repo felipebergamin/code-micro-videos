@@ -9,9 +9,11 @@ import { Link } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import categoryHttp from '../../utils/http/category-http';
 import { Category } from '../../utils/models';
-import { FilterResetButton } from '../../components/Table/FilterResetButton';
-import { Creators } from '../../store/filter';
-import DefaultTable, { makeActionStyles } from '../../components/Table';
+import FilterResetButton from '../../components/Table/FilterResetButton';
+import DefaultTable, {
+  makeActionStyles,
+  MuiDataTableRefComponent,
+} from '../../components/Table';
 import useFilter from '../../hooks/useFilter';
 
 const columnsDefinitions: MUIDataTableColumn[] = [
@@ -26,11 +28,17 @@ const columnsDefinitions: MUIDataTableColumn[] = [
   {
     name: 'name',
     label: 'Nome',
+    options: {
+      filter: false,
+    },
   },
   {
     name: 'is_active',
     label: 'Ativo?',
     options: {
+      filterOptions: {
+        names: ['Sim', 'Não'],
+      },
       customBodyRender(value) {
         return value ? (
           <Chip label="Sim" color="primary" />
@@ -44,6 +52,7 @@ const columnsDefinitions: MUIDataTableColumn[] = [
     name: 'created_at',
     label: 'Criado em',
     options: {
+      filter: false,
       customBodyRender(value) {
         return <span>{format(parseISO(value), 'dd/MM/yyyy')}</span>;
       },
@@ -80,12 +89,12 @@ const Table: React.FC = () => {
   const subscribed = useRef(true);
   const [loading, setLoading] = useState(false);
   const [tableData, setTableData] = useState<Category[]>([]);
+  const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
   const {
     columns,
     filterManager,
     filterState,
     debouncedFilterState,
-    dispatch,
     totalRecords,
     setTotalRecords,
   } = useFilter({
@@ -93,6 +102,7 @@ const Table: React.FC = () => {
     debounceTime,
     rowsPerPage,
     rowsPerPageOptions,
+    tableRef,
   });
 
   async function getData() {
@@ -100,11 +110,11 @@ const Table: React.FC = () => {
     try {
       const { data } = await categoryHttp.list({
         queryParams: {
-          search: filterManager.cleanSearchText(filterState.search),
-          page: filterState.pagination.page,
-          per_page: filterState.pagination.per_page,
-          sort: filterState.order.sort,
-          dir: filterState.order.dir,
+          search: filterManager.cleanSearchText(debouncedFilterState.search),
+          page: debouncedFilterState.pagination.page,
+          per_page: debouncedFilterState.pagination.per_page,
+          sort: debouncedFilterState.order.sort,
+          dir: debouncedFilterState.order.dir,
         },
       });
       if (subscribed.current) {
@@ -145,6 +155,7 @@ const Table: React.FC = () => {
         data={tableData}
         loading={loading}
         debouncedSearchTime={debouncedSearchTime}
+        ref={tableRef}
         options={{
           serverSide: true,
           responsive: 'standard',
@@ -156,7 +167,7 @@ const Table: React.FC = () => {
           // eslint-disable-next-line react/display-name
           customToolbar: () => (
             <FilterResetButton
-              handleClick={() => dispatch(Creators.setReset())}
+              handleClick={() => filterManager.resetFilter()}
             />
           ),
           onSearchChange: (value) => filterManager.changeSearch(value),

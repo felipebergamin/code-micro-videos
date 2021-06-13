@@ -11,6 +11,7 @@ import {
 } from 'store/filter/types';
 import reducer, { Creators } from 'store/filter';
 import * as yup from 'utils/vendor/yup';
+import { MuiDataTableRefComponent } from 'components/Table';
 
 interface FilterManagerOptions {
   columns: MUIDataTableColumn[];
@@ -18,14 +19,17 @@ interface FilterManagerOptions {
   rowsPerPageOptions: number[];
   debounceTime: number;
   history: History;
+  tableRef: React.MutableRefObject<MuiDataTableRefComponent>;
+  extraFilter?: ExtraFilter;
 }
 
-interface UseFilterOptions extends Omit<FilterManagerOptions, 'history'> {
-  columns: MUIDataTableColumn[];
-  rowsPerPage: number;
-  rowsPerPageOptions: number[];
-  debounceTime: number;
+interface ExtraFilter {
+  getStateFromURL: (queryParams: URLSearchParams) => any;
+  formatSearchParams: (debouncedState: FilterState) => any;
+  createValidationSchema: () => any;
 }
+
+interface UseFilterOptions extends Omit<FilterManagerOptions, 'history'> {}
 
 export default function useFilter(options: UseFilterOptions) {
   const history = useHistory();
@@ -37,6 +41,7 @@ export default function useFilter(options: UseFilterOptions) {
   const [debouncedFilterState] = useDebounce(filterState, options.debounceTime);
   const [totalRecords, setTotalRecords] = useState<number>(0);
   filterManager.state = filterState;
+  filterManager.debouncedState = debouncedFilterState;
   filterManager.dispatch = dispatch;
 
   filterManager.applyOrderInColumns();
@@ -58,26 +63,37 @@ export default function useFilter(options: UseFilterOptions) {
 
 export class FilterManager {
   schema: any;
-
   state: FilterState = null as any;
-
+  debouncedState: FilterState = null as any;
   dispatch: Dispatch<FilterActions> = null as any;
-
   columns: MUIDataTableColumn[];
-
   rowsPerPage: number;
-
   rowsPerPageOptions: number[];
-
   history: History;
+  tableRef: React.MutableRefObject<MuiDataTableRefComponent>;
+  extraFilter: ExtraFilter | undefined;
 
   constructor(options: FilterManagerOptions) {
-    const { columns, rowsPerPage, rowsPerPageOptions, history } = options;
+    const {
+      columns,
+      rowsPerPage,
+      rowsPerPageOptions,
+      history,
+      tableRef,
+      extraFilter,
+    } = options;
     this.columns = columns;
     this.rowsPerPage = rowsPerPage;
     this.rowsPerPageOptions = rowsPerPageOptions;
     this.history = history;
+    this.tableRef = tableRef;
+    this.extraFilter = extraFilter;
     this.createValidationSchema();
+  }
+
+  private resetTablePagination() {
+    this.tableRef.current.changeRowsPerPage(this.rowsPerPage);
+    this.tableRef.current.changePage(0);
   }
 
   changeSearch(value: any) {
@@ -99,6 +115,25 @@ export class FilterManager {
         dir: direction.includes('desc') ? 'desc' : 'asc',
       }),
     );
+    this.resetTablePagination();
+  }
+
+  changeExtraFilter(data: any) {
+    //{type: 'Diretor'}
+    this.dispatch(Creators.updateExtraFilter(data));
+  }
+
+  resetFilter() {
+    const INITIAL_STATE = {
+      ...this.schema.cast({}),
+      search: { value: null, update: true },
+    };
+    this.dispatch(
+      Creators.setReset({
+        state: INITIAL_STATE,
+      }),
+    );
+    this.resetTablePagination();
   }
 
   applyOrderInColumns() {
@@ -127,7 +162,7 @@ export class FilterManager {
     this.history.replace({
       pathname: this.history.location.pathname,
       search: `?${new URLSearchParams(this.formatSearchParams() as any)}`,
-      state: this.state,
+      state: this.debouncedState,
     });
   }
 
@@ -137,13 +172,13 @@ export class FilterManager {
       pathname: this.history.location.pathname,
       search: `?${new URLSearchParams(this.formatSearchParams() as any)}`,
       state: {
-        ...this.state,
-        search: this.cleanSearchText(this.state.search),
+        ...this.debouncedState,
+        search: this.cleanSearchText(this.debouncedState.search),
       },
     };
 
     const oldState = this.history.location.state;
-    const nextState = this.state;
+    const nextState = this.debouncedState;
 
     if (isEqual(oldState, nextState)) {
       console.log('isEqual');
@@ -154,19 +189,21 @@ export class FilterManager {
   }
 
   private formatSearchParams() {
-    const search = this.cleanSearchText(this.state.search);
+    const search = this.cleanSearchText(this.debouncedState.search);
     return {
-      ...(search && search !== '' && { search }),
-      ...(this.state.pagination.page !== 1 && {
-        page: this.state.pagination.page,
+      ...(search && search !== '' && { search: search }),
+      ...(this.debouncedState.pagination.page !== 1 && {
+        page: this.debouncedState.pagination.page,
       }),
-      ...(this.state.pagination.per_page !== 15 && {
-        per_page: this.state.pagination.per_page,
+      ...(this.debouncedState.pagination.per_page !== 15 && {
+        per_page: this.debouncedState.pagination.per_page,
       }),
-      ...(this.state.order.sort && {
-        sort: this.state.order.sort,
-        dir: this.state.order.dir,
+      ...(this.debouncedState.order.sort && {
+        sort: this.debouncedState.order.sort,
+        dir: this.debouncedState.order.dir,
       }),
+      ...(this.extraFilter &&
+        this.extraFilter.formatSearchParams(this.debouncedState)),
     };
   }
 
@@ -184,6 +221,9 @@ export class FilterManager {
         sort: queryParams.get('sort'),
         dir: queryParams.get('dir'),
       },
+      ...(this.extraFilter && {
+        extraFilter: this.extraFilter.getStateFromURL(queryParams),
+      }),
     });
   }
 
@@ -202,8 +242,11 @@ export class FilterManager {
           .default(1),
         per_page: yup
           .number()
-          .oneOf(this.rowsPerPageOptions)
-          .transform((value) => (isNaN(value) ? undefined : value))
+          .transform((value) =>
+            isNaN(value) || !this.rowsPerPageOptions.includes(parseInt(value))
+              ? undefined
+              : value,
+          )
           .default(this.rowsPerPage),
       }),
       order: yup.object().shape({
@@ -228,6 +271,9 @@ export class FilterManager {
               : value,
           )
           .default(null),
+      }),
+      ...(this.extraFilter && {
+        extraFilter: this.extraFilter.createValidationSchema(),
       }),
     });
   }

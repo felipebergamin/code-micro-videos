@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\CastMember;
@@ -34,6 +35,7 @@ class CastMemberUnitTest extends TestCase
       HasFactory::class,
       SoftDeletes::class,
       Uuid::class,
+      Filterable::class,
     ];
     $castMemberTraits = array_keys(class_uses(CastMember::class));
     ($castMemberTraits);

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\ModelFilters\GenreFilter;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Genre extends Model
 {
-  use HasFactory, SoftDeletes, Traits\Uuid;
+  use HasFactory, SoftDeletes, Traits\Uuid, Filterable;
 
   public $incrementing = false;
   protected $fillable = ['name', 'is_active'];
@@ -21,5 +23,10 @@ class Genre extends Model
   public function categories()
   {
     return $this->belongsToMany(Category::class);
+  }
+
+  public function modelFilter()
+  {
+    return $this->provideFilter(GenreFilter::class);
   }
 }

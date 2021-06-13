@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Genre;
@@ -34,6 +35,7 @@ class GenreUnitTest extends TestCase
       HasFactory::class,
       SoftDeletes::class,
       Uuid::class,
+      Filterable::class,
     ];
     $genreTraits = array_keys(class_uses(Genre::class));
     $this->assertEquals($traits, $genreTraits);

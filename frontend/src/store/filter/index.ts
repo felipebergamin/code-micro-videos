@@ -1,6 +1,11 @@
 import { createActions, createReducer } from 'reduxsauce';
 import * as Typings from './types';
-import { SetOrderAction, SetPerPageAction } from './types';
+import {
+  SetOrderAction,
+  SetPerPageAction,
+  SetResetAction,
+  UpdateExtraFilterAction,
+} from './types';
 
 export const { Types, Creators } = createActions<
   {
@@ -9,6 +14,7 @@ export const { Types, Creators } = createActions<
     SET_PER_PAGE: string;
     SET_ORDER: string;
     SET_RESET: string;
+    UPDATE_EXTRA_FILTER: string;
   },
   {
     setSearch(
@@ -21,14 +27,20 @@ export const { Types, Creators } = createActions<
     setOrder(
       payload: Typings.SetOrderAction['payload'],
     ): Typings.SetOrderAction;
-    setReset(): any;
+    setReset(
+      payload: Typings.SetResetAction['payload'],
+    ): Typings.SetResetAction;
+    updateExtraFilter(
+      payload: Typings.UpdateExtraFilterAction['payload'],
+    ): Typings.UpdateExtraFilterAction;
   }
 >({
   setSearch: ['payload'],
   setPage: ['payload'],
   setPerPage: ['payload'],
   setOrder: ['payload'],
-  setReset: [],
+  setReset: ['payload'],
+  updateExtraFilter: ['payload'],
 });
 
 export const INITIAL_STATE: Typings.State = {
@@ -100,8 +112,22 @@ function setOrder(
   };
 }
 
-function setReset() {
-  return { ...INITIAL_STATE, search: { value: null, update: true } };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function setReset(state = INITIAL_STATE, action: SetResetAction) {
+  return action.payload.state;
+}
+
+function updateExtraFilter(
+  state = INITIAL_STATE,
+  action: UpdateExtraFilterAction,
+) {
+  return {
+    ...state,
+    extraFilter: {
+      ...state.extraFilter,
+      ...action.payload, // {type: 'Diretor'}
+    },
+  };
 }
 
 const reducer = createReducer<Typings.State, Typings.Actions>(INITIAL_STATE, {
@@ -110,6 +136,7 @@ const reducer = createReducer<Typings.State, Typings.Actions>(INITIAL_STATE, {
   [Types.SET_PER_PAGE]: setPerPage as any,
   [Types.SET_ORDER]: setOrder as any,
   [Types.SET_RESET]: setReset,
+  [Types.UPDATE_EXTRA_FILTER]: updateExtraFilter as any,
 });
 
 export default reducer;

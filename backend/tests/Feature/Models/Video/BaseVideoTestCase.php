@@ -8,19 +8,19 @@ use Tests\TestCase;
 
 abstract class BaseVideoTestCase extends TestCase
 {
-  use DatabaseMigrations;
+    use DatabaseMigrations;
 
-  protected $data;
+    protected $data;
 
-  protected function setUp(): void
-  {
-    parent::setUp();
-    $this->data = [
-      'title' => 'title',
-      'description' => 'description',
-      'year_launched' => 2010,
-      'rating' => Video::RATING_LIST[0],
-      'duration' => 90,
-    ];
-  }
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->data = [
+            'title' => 'title',
+            'description' => 'description',
+            'year_launched' => 2010,
+            'rating' => Video::RATING_LIST[0],
+            'duration' => 90,
+        ];
+    }
 }

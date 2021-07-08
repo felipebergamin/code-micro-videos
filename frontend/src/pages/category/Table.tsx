@@ -1,82 +1,184 @@
-import { useEffect, useState } from 'react';
-import MUITable, { MUIDataTableColumn } from 'mui-datatables';
-import Chip from '@material-ui/core/Chip';
-import { format, parseISO } from 'date-fns';
-import { IconButton } from '@material-ui/core';
+import * as React from 'react';
+import {useEffect, useRef, useState} from "react";
+import format from "date-fns/format";
+import parseISO from "date-fns/parseISO";
+import categoryHttp from "../../util/http/category-http";
+import {BadgeNo, BadgeYes} from "../../components/Badge";
+import {Category, ListResponse} from "../../util/models";
+import DefaultTable, {makeActionStyles, TableColumn, MuiDataTableRefComponent} from '../../components/Table';
+import {useSnackbar} from "notistack";
+import {IconButton, MuiThemeProvider} from "@material-ui/core";
+import {Link} from "react-router-dom";
 import EditIcon from '@material-ui/icons/Edit';
-import { Link } from 'react-router-dom';
+import {FilterResetButton} from "../../components/Table/FilterResetButton";
+import useFilter from "../../hooks/useFilter";
+import {useContext} from "react";
+import LoadingContext from "../../components/loading/LoadingContext";
 
-import categoryHttp from '../../utils/http/category-http';
-import { Category } from '../../utils/models';
-
-const columnsDefinitions: MUIDataTableColumn[] = [
-  {
-    name: 'id',
-    label: 'ID',
-    options: {
-      sort: false,
-      filter: false,
+const columnsDefinition: TableColumn[] = [
+    {
+        name: 'id',
+        label: 'ID',
+        width: '30%',
+        options: {
+            sort: false,
+            filter: false
+        }
     },
-  },
-  {
-    name: 'name',
-    label: 'Nome',
-  },
-  {
-    name: 'is_active',
-    label: 'Ativo?',
-    options: {
-      customBodyRender(value) {
-        return value ? (
-          <Chip label="Sim" color="primary" />
-        ) : (
-          <Chip label="Não" color="secondary" />
-        );
-      },
+    {
+        name: "name",
+        label: "Nome",
+        width: '43%',
+        options: {
+            filter: false
+        }
     },
-  },
-  {
-    name: 'created_at',
-    label: 'Criado em',
-    options: {
-      customBodyRender(value) {
-        return <span>{format(parseISO(value), 'dd/MM/yyyy')}</span>;
-      },
+    {
+        name: "is_active",
+        label: "Ativo?",
+        width: '4%',
+        options: {
+            filterOptions: {
+              names: ['Sim', 'Não']
+            },
+            customBodyRender(value, tableMeta, updateValue) {
+                return value ? <BadgeYes/> : <BadgeNo/>;
+            }
+        },
     },
-  },
-  {
-    name: 'actions',
-    label: 'Ações',
-    options: {
-      sort: false,
-      filter: false,
-      customBodyRender: function CustomBody(value, tableMeta) {
-        return (
-          <IconButton
-            color="secondary"
-            component={Link}
-            to={`/categories/${tableMeta.rowData[0]}/edit`}
-          >
-            <EditIcon />
-          </IconButton>
-        );
-      },
+    {
+        name: "created_at",
+        label: "Criado em",
+        width: '10%',
+        options: {
+            filter: false,
+            customBodyRender(value, tableMeta, updateValue) {
+                return <span>{format(parseISO(value), 'dd/MM/yyyy')}</span>
+            }
+        }
     },
-  },
+    {
+        name: "actions",
+        label: "Ações",
+        width: '13%',
+        options: {
+            sort: false,
+            filter: false,
+            customBodyRender: (value, tableMeta) => {
+                return (
+                    <IconButton
+                        color={'secondary'}
+                        component={Link}
+                        to={`/categories/${tableMeta.rowData[0]}/edit`}
+                    >
+                        <EditIcon/>
+                    </IconButton>
+                )
+            }
+        }
+    }
 ];
 
-const Table: React.FC = () => {
-  const [tableData, setTableData] = useState<Category[]>([]);
-  useEffect(() => {
-    categoryHttp.list().then(({ data: { data } }) => setTableData(data));
-  }, []);
-  return (
-    <MUITable
-      columns={columnsDefinitions}
-      title="Listagem de categorias"
-      data={tableData}
-    />
-  );
+const debounceTime = 300;
+const debouncedSearchTime = 300;
+const rowsPerPage = 15;
+const rowsPerPageOptions = [15, 25, 50];
+const Table = () => {
+    const snackbar = useSnackbar();
+    const subscribed = useRef(true);
+    const [data, setData] = useState<Category[]>([]);
+    const loading = useContext(LoadingContext);
+    const tableRef = useRef() as React.MutableRefObject<MuiDataTableRefComponent>;
+//property, funcao - changePage changeRowsPerPage
+    const {
+        columns,
+        filterManager,
+        cleanSearchText,
+        filterState,
+        debouncedFilterState,
+        totalRecords,
+        setTotalRecords,
+    } = useFilter({
+        columns: columnsDefinition,
+        debounceTime: debounceTime,
+        rowsPerPage,
+        rowsPerPageOptions,
+        tableRef
+    });
+
+    useEffect(() => {
+        subscribed.current = true;
+        getData();
+        return () => {
+            subscribed.current = false;
+        }
+    }, [
+        cleanSearchText(debouncedFilterState.search),
+        debouncedFilterState.pagination.page,
+        debouncedFilterState.pagination.per_page,
+        debouncedFilterState.order
+    ]);
+
+    async function getData() {
+        try {
+            const {data} = await categoryHttp.list<ListResponse<Category>>({
+                queryParams: {
+                    search: cleanSearchText(debouncedFilterState.search),
+                    page: debouncedFilterState.pagination.page,
+                    per_page: debouncedFilterState.pagination.per_page,
+                    sort: debouncedFilterState.order.sort,
+                    dir: debouncedFilterState.order.dir,
+                }
+            });
+            if (subscribed.current) {
+                setData(data.data);
+                setTotalRecords(data.meta.total);
+            }
+        } catch (error) {
+            console.error(error);
+            if (categoryHttp.isCancelledRequest(error)) {
+                return;
+            }
+            snackbar.enqueueSnackbar(
+                'Não foi possível carregar as informações',
+                {variant: 'error',}
+            )
+        }
+    }
+
+
+    return (
+        <MuiThemeProvider theme={makeActionStyles(columnsDefinition.length - 1)}>
+            <DefaultTable
+                title=""
+                columns={columns}
+                data={data}
+                loading={loading}
+                debouncedSearchTime={debouncedSearchTime}
+                ref={tableRef}
+                options={{
+                    serverSide: true,
+                    responsive: "scrollMaxHeight",
+                    searchText: filterState.search as any,
+                    page: filterState.pagination.page - 1,
+                    rowsPerPage: filterState.pagination.per_page,
+                    rowsPerPageOptions,
+                    count: totalRecords,
+                    customToolbar: () => (
+                        <FilterResetButton
+                            handleClick={() => filterManager.resetFilter()}
+                        />
+                    ),
+                    onSearchChange: (value) => filterManager.changeSearch(value),
+                    onChangePage: (page) => filterManager.changePage(page),
+                    onChangeRowsPerPage: (perPage) => filterManager.changeRowsPerPage(perPage),
+                    onColumnSortChange: (changedColumn: string, direction: string) =>
+                        filterManager.changeColumnSort(changedColumn, direction)
+                }}
+            />
+        </MuiThemeProvider>
+    );
 };
 
 export default Table;
+

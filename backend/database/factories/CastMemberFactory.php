@@ -1,29 +1,14 @@
 <?php
 
-namespace Database\Factories;
+/** @var \Illuminate\Database\Eloquent\Factory $factory */
 
 use App\Models\CastMember;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Faker\Generator as Faker;
 
-class CastMemberFactory extends Factory
-{
-  /**
-   * The name of the factory's corresponding model.
-   *
-   * @var string
-   */
-  protected $model = CastMember::class;
-
-  /**
-   * Define the model's default state.
-   *
-   * @return array
-   */
-  public function definition()
-  {
+$factory->define(CastMember::class, function (Faker $faker) {
+    $types = [CastMember::TYPE_DIRECTOR, CastMember::TYPE_ACTOR];
     return [
-      'name' => $this->faker->name(),
-      'type' => rand(1, 2),
+        'name' => $faker->lastName,
+        'type' => $types[array_rand($types)]
     ];
-  }
-}
+});

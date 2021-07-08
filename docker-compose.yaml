@@ -8,10 +8,11 @@ services:
     ports:
       - "3000:3000"
       - "35729:35729"
-    volumes:
-      - .:/var/www
     environment:
       - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - .:/var/www
+      - ./.docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
     networks:
       - app-network
     depends_on:
@@ -45,7 +46,6 @@ services:
     environment:
       - MYSQL_DATABASE=code_micro_videos
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_USER=root
     networks:
       - app-network
 

@@ -2,23 +2,37 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\ModelFilters\CastMemberFilter;
+use App\Models\Traits\SerializeDateToIso8601;
+use App\Models\Traits\Uuid;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CastMember extends Model
 {
-  use HasFactory, SoftDeletes, Traits\Uuid;
+    use SoftDeletes, Uuid, Filterable, SerializeDateToIso8601;
 
-  const TYPES = ['DIRECTOR' => 1, 'ACTOR' => 2];
+    const TYPE_DIRECTOR = 1;
+    const TYPE_ACTOR = 2;
 
-  protected $fillable = ['name', 'type'];
+    public static $types = [
+        CastMember::TYPE_DIRECTOR,
+        CastMember::TYPE_ACTOR,
+    ];
 
-  protected $dates = ['created_at', 'updated_at', 'deleted_at'];
+    protected $fillable = ['name', 'type'];
+    protected $dates = ['deleted_at'];
+    protected $casts = [
+        'id' => 'string',
+        'type' => 'integer'
+    ];
 
-  protected $casts = [
-    'id' => 'string'
-  ];
+    public $incrementing = false;
+    protected $keyType = 'string';
 
-  public $incrementing = false;
+    public function modelFilter()
+    {
+        return $this->provideFilter(CastMemberFilter::class);
+    }
 }

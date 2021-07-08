@@ -1,86 +1,61 @@
 steps:
-  - id: "Gerando service-account-storage.json"
-    name: "gcr.io/cloud-builders/gcloud"
-    args:
-      - kms
-      - decrypt
-      - --ciphertext-file=./backend/storage/credentials/google/service-account-storage.json.enc
-      - --plaintext-file=./backend/storage/credentials/google/service-account-storage.json
-      - --location=global
-      - --keyring=testing-lesson
-      - --key=service-account
 
-  - id: "Rodando docker-compose"
-    name: "docker/compose"
-    args: ["-f", "docker-compose.cloudbuild.yaml", "up", "-d"]
-    env:
-      - GOOGLE_CLOUD_PROJECT_ID=code-micro-videos-303318
-      - GOOGLE_CLOUD_KEY_FILE=service-account-storage.json
-      - GOOGLE_CLOUD_STORAGE_BUCKET=code-micro-videos-frb
-      - GOOGLE_CLOUD_STORAGE_API_URI=https://storage.cloud.google.com/code-micro-videos-frb
-      - TESTING_PROD=true
+    -   id: 'Gerando service-account-storage.json'
+        name: 'gcr.io/cloud-builders/gcloud'
+        args:
+            - kms
+            - decrypt
+            - --ciphertext-file=./backend/storage/credentials/google/service-account-storage.json.enc
+            - --plaintext-file=./backend/storage/credentials/google/service-account-storage.json
+            - --location=global
+            - --keyring=testing-lesson
+            - --key=service-account
 
-  - id: "Chown in /var/www"
-    name: "docker"
-    args:
-      [
-        "exec",
-        "-u",
-        "root",
-        "-t",
-        "app",
-        "chown",
-        "-R",
-        "www-data:www-data",
-        "/var/www",
-      ]
+    -   id: "Rodando docker-compose"
+        name: 'docker/compose'
+        args: ['-f','docker-compose.prod.yaml','up','-d']
+        env:
+            - GOOGLE_CLOUD_PROJECT_ID=code-micro-videos-303318
+            - GOOGLE_CLOUD_KEY_FILE=service-account-storage.json
+            - GOOGLE_CLOUD_STORAGE_BUCKET=code-micro-videos-frb
+            - GOOGLE_CLOUD_STORAGE_API_URI=https://storage.cloud.google.com/code-micro-videos-frb
+            - TESTING_PROD=true
 
-  - id: "Rodando docker ps"
-    name: "docker"
-    args: ["ps"]
+    - id: "Chown in /var/www"
+      name: "docker"
+      args:
+        [
+            "exec",
+            "-u",
+            "root",
+            "-t",
+            "app",
+            "chown",
+            "-R",
+            "www-data:www-data",
+            "/var/www",
+        ]
 
-  - id: "Rodando composer"
-    name: "docker"
-    args:
-      ["exec", "-t", "app", "composer", "install", "--working-dir=./backend/"]
+    -   id: "Rodando composer"
+        name: 'docker'
+        args: ["exec", "-t", "app", "composer", "install", "--working-dir=./backend/"]
 
-  - id: "Copiando .env"
-    dir: "backend"
-    name: "docker"
-    args:
-      ["exec", "-t", "app", "cp", "./backend/.env.example", "./backend/.env"]
+    -   id: "Copiando .env"
+        name: 'docker'
+        args: ['exec','-t','app','cp', './backend/.env.example', './backend/.env']
 
-  - id: "Copiando .env.testing"
-    name: "docker"
-    args:
-      [
-        "exec",
-        "-t",
-        "app",
-        "cp",
-        "./backend/.env.testing.example",
-        "./backend/.env.testing",
-      ]
+    -   id: "Copiando .env.testing"
+        name: 'docker'
+        args: ['exec','-t','app','cp','./backend/.env.testing.example','./backend/.env.testing']
 
-  - id: "Rodando key:generate"
-    name: "docker"
-    args:
-      ["exec", "-t", "app", "php", "/var/www/backend/artisan", "key:generate"]
+    -   id: "Rodando key:generate"
+        name: 'docker'
+        args: ["exec", "-t", "app", "php", "/var/www/backend/artisan", "key:generate"]
 
-  - id: "Rodando migrations"
-    dir: "backend"
-    name: "docker"
-    args: ["exec", "-t", "app", "php", "/var/www/backend/artisan", "migrate"]
+    -   id: "Rodando migrations"
+        name: 'docker'
+        args: ['exec','-t','app','php','/var/www/backend/artisan','migrate']
 
-  - id: "Rodando Phpunit"
-    name: "docker"
-    args:
-      [
-        "exec",
-        "-t",
-        "app",
-        "php",
-        "/var/www/backend/vendor/bin/phpunit",
-        "-c",
-        "/var/www/backend/phpunit.xml",
-      ]
+    -   id: "Rodando Phpunit"
+        name: 'docker'
+        args: ['exec','-t','app','php','/var/www/backend/vendor/bin/phpunit','-c','/var/www/backend/phpunit.xml']
